@@ -22,7 +22,8 @@ const experience = [
       'Supported mobile application security assessments focusing on reverse engineering, dynamic analysis, and mitigating insecure data storage and SDK misconfigurations.',
       'Designed and maintained a fraud prevention system for the Ads ecosystem using advanced heuristics and behavioral analysis.',
       'Organized Capture the Flag (CTF) events during internal security conferences to foster a security-first culture.',
-      'Drove DevSecOps adoption by embedding security checks into CI/CD pipelines.'
+      'Drove DevSecOps adoption by embedding security checks into CI/CD pipelines.',
+      'Hunt high-impact, scalable security issues from bug bounty data. Identify patterns for centralized fixes. Approach teams to fix at scale.'
     ]
   },
   {
@@ -246,3 +247,6 @@ function drawParticles() {
 }
 
 drawParticles();
+
+// ===== Dynamic Footer Year =====
+document.getElementById('footer-year').textContent = new Date().getFullYear();

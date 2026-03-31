@@ -130,6 +130,23 @@ a { color: inherit; text-decoration: none; }
 
 .hero-content { max-width: 800px; }
 
+.hero-avatar {
+  width: 140px;
+  height: 140px;
+  margin: 0 auto 1.5rem;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 3px solid rgba(0, 240, 255, 0.4);
+  box-shadow: 0 0 30px rgba(0, 240, 255, 0.3), 0 0 60px rgba(0, 240, 255, 0.1);
+  animation: fadeInDown 0.8s ease;
+}
+
+.hero-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
 .hero-badge {
   display: inline-block;
   padding: 0.5rem 1.2rem;
