@@ -1,135 +1,248 @@
-// Data
+// ===== Data from Resume =====
 const skills = [
-  { name: 'Penetration Testing', icon: 'terminal', level: 95 },
-  { name: 'Risk Assessment', icon: 'shield', level: 90 },
-  { name: 'Secure Code Review', icon: 'code-2', level: 85 },
-  { name: 'Threat Modeling', icon: 'bug', level: 92 },
-  { name: 'Cloud Security', icon: 'cloud', level: 88 },
-  { name: 'Security Automation', icon: 'bot', level: 82 },
-];
-
-const projects = [
-  {
-    name: 'Fireball',
-    description: 'Internal security assessment portal for streamlined vulnerability management and reporting.',
-    tech: ['Python', 'React', 'GraphQL', 'Docker'],
-    link: 'https://github.com/username/fireball'
-  },
-  {
-    name: 'Mail Automation',
-    description: 'Automated security scanning and reporting system for email infrastructure.',
-    tech: ['Node.js', 'AWS Lambda', 'SendGrid API'],
-    link: 'https://github.com/username/mail-automation'
-  }
+  { name: 'Web App Security Review', icon: '🌐', level: 95 },
+  { name: 'Threat Modelling', icon: '🎯', level: 92 },
+  { name: 'Android/iOS Security', icon: '📱', level: 90 },
+  { name: 'Source Code Review', icon: '🔍', level: 88 },
+  { name: 'AI Prompt Engineering', icon: '🤖', level: 85 },
+  { name: 'RAG Model Creation', icon: '🧠', level: 82 },
 ];
 
 const experience = [
   {
     company: 'Amazon India',
-    role: 'Senior Security Engineer',
-    period: '2023 - Present',
-    description: 'Lead application security initiatives and cloud security assessments.'
+    role: 'Security Engineer',
+    period: '02/2023 — Present',
+    location: 'Bengaluru, India',
+    bullets: [
+      'Conducted comprehensive threat modelling for web, mobile, and backend services, identifying risks across application logic, infrastructure, and cloud resources.',
+      'Partnered with engineering teams to triage and remediate security vulnerabilities, enabling secure-by-default development practices.',
+      'Performed secure code reviews and business logic assessments across high-impact applications, identifying authorization flaws, data leakage, and privilege escalation.',
+      'Leveraged AI/ML tools and custom automation frameworks to accelerate threat detection and vulnerability triage across large-scale systems.',
+      'Supported mobile application security assessments focusing on reverse engineering, dynamic analysis, and mitigating insecure data storage and SDK misconfigurations.',
+      'Designed and maintained a fraud prevention system for the Ads ecosystem using advanced heuristics and behavioral analysis.',
+      'Organized Capture the Flag (CTF) events during internal security conferences to foster a security-first culture.',
+      'Drove DevSecOps adoption by embedding security checks into CI/CD pipelines.'
+    ]
   },
   {
-    company: 'Ola Cabs',
-    role: 'Product Security Engineer',
-    period: '2022 - 2023',
-    description: 'Conducted security reviews and implemented automated security testing.'
+    company: 'OLA Cabs (ANI Technologies)',
+    role: 'Senior Product Security Engineer',
+    period: '01/2022 — 02/2023',
+    location: 'Bengaluru, India',
+    bullets: [
+      'Led Product Security Design Reviews including architectural assessments, threat modeling, and security posture evaluations for web and mobile platforms (iOS & Android).',
+      'Conducted black-box and grey-box security testing aligned with OWASP Top 10 standards.',
+      'Specialized in mobile security using Frida, MobSF, Objection, and Burp Suite to exploit insecure storage, runtime manipulation, and reverse engineering weaknesses.',
+      'Implemented runtime instrumentation using Frida to bypass root/jailbreak detection, SSL pinning, and monitor sensitive API calls.',
+      'Automated vulnerability detection across the organization using custom scripts, enhancing visibility in CI/CD pipelines.',
+    ]
   },
   {
-    company: 'Synopsys',
-    role: 'Security Consultant',
-    period: '2019 - 2022',
-    description: 'Performed dynamic application security testing and vulnerability assessments.'
+    company: 'Synopsys, Inc',
+    role: 'Associate Security Consultant',
+    period: '12/2018 — 01/2022',
+    location: 'Bengaluru, India',
+    bullets: [
+      'Performed DAST and manual security assessments using Burp Suite, Nessus, AppScan, Metasploit, SqlMap, Nmap, OpenVAS, Nikto, and Dirb.',
+      'Identified injection flaws, broken access controls, misconfigurations, and custom business logic issues, prioritizing by business impact.',
+      'Conducted black-box and grey-box testing aligned with OWASP Top 10 and internal risk frameworks.',
+      'Delivered technical reports and executive summaries outlining risk impact, exploitability, and tailored mitigation strategies.',
+      'Engaged in continuous learning on mobile penetration testing, secure SDLC, cloud configuration reviews, and threat modelling.',
+    ]
   }
 ];
 
-// Initialize Lucide icons
-lucide.createIcons();
+const education = [
+  {
+    type: 'Post-Graduation',
+    degree: 'M. Tech — AI & ML in ARVr Technologies',
+    institution: 'IIT Jodhpur',
+    gpa: '7 / 10'
+  },
+  {
+    type: 'Graduation',
+    degree: 'B. Tech — Computer Science (Cyber Security & Forensics)',
+    institution: 'University of Petroleum and Energy Studies (UPES)',
+    gpa: '7.76 / 10'
+  }
+];
 
-// Intersection Observer for skill bars animation
-const observeElement = (element) => {
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        entry.target.classList.add('skill-bar');
-        observer.unobserve(entry.target);
-      }
-    });
-  }, { threshold: 0.5 });
-  
-  observer.observe(element);
-};
+// ===== Typing Effect =====
+const phrases = [
+  'Securing applications, one vulnerability at a time.',
+  'Threat modeling · Code review · Pen testing',
+  '7 years in Application & Product Security',
+  'Building secure-by-default systems'
+];
 
-// Populate Skills
+let phraseIdx = 0, charIdx = 0, deleting = false;
+const typedEl = document.getElementById('typed-text');
+
+function typeLoop() {
+  const current = phrases[phraseIdx];
+  if (!deleting) {
+    typedEl.textContent = current.substring(0, charIdx + 1);
+    charIdx++;
+    if (charIdx === current.length) {
+      deleting = true;
+      setTimeout(typeLoop, 2000);
+      return;
+    }
+    setTimeout(typeLoop, 50);
+  } else {
+    typedEl.textContent = current.substring(0, charIdx - 1);
+    charIdx--;
+    if (charIdx === 0) {
+      deleting = false;
+      phraseIdx = (phraseIdx + 1) % phrases.length;
+    }
+    setTimeout(typeLoop, 30);
+  }
+}
+typeLoop();
+
+// ===== Intersection Observer =====
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach((entry, i) => {
+    if (entry.isIntersecting) {
+      setTimeout(() => entry.target.classList.add('visible'), i * 80);
+      observer.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.15 });
+
+// ===== Populate Skills =====
 const skillsContainer = document.getElementById('skills-container');
 skills.forEach(skill => {
-  const skillElement = document.createElement('div');
-  skillElement.className = 'bg-gray-900 p-6 rounded-lg border border-cyan-800 hover:border-cyan-400 transition-colors animate-fade-in skill-container';
-  skillElement.innerHTML = `
-    <div class="flex items-center gap-4 mb-4">
-      <div class="text-gradient">
-        <i data-lucide="${skill.icon}" class="w-6 h-6"></i>
-      </div>
-      <h3 class="text-xl font-semibold text-gradient">${skill.name}</h3>
+  const el = document.createElement('div');
+  el.className = 'skill-card';
+  el.innerHTML = `
+    <div class="skill-header">
+      <div class="skill-icon">${skill.icon}</div>
+      <h3>${skill.name}</h3>
     </div>
-    <div class="h-2 bg-gray-700 rounded-full overflow-hidden">
-      <div 
-        class="h-full rounded-full"
-        style="--skill-level: ${skill.level}%"
-        data-level="${skill.level}%"
-      ></div>
+    <div class="skill-bar-track">
+      <div class="skill-bar-fill" style="--level: ${skill.level}%"></div>
     </div>
   `;
-  skillsContainer.appendChild(skillElement);
-  
-  // Observe the skill bar
-  const skillBar = skillElement.querySelector('.rounded-full');
-  observeElement(skillBar);
+  skillsContainer.appendChild(el);
+  observer.observe(el);
 });
 
-// Populate Projects
-const projectsContainer = document.getElementById('projects-container');
-projects.forEach(project => {
-  const projectElement = document.createElement('div');
-  projectElement.className = 'group bg-gray-800 p-6 rounded-lg hover:bg-gray-750 transition-all duration-300 animate-fade-in hover-gradient';
-  projectElement.innerHTML = `
-    <h3 class="text-2xl font-bold mb-4 text-gradient">${project.name}</h3>
-    <p class="mb-4 text-gray-300">${project.description}</p>
-    <div class="flex flex-wrap gap-2 mb-4">
-      ${project.tech.map(tech => `
-        <span class="px-3 py-1 bg-gray-700 rounded-full text-sm">${tech}</span>
-      `).join('')}
-    </div>
-    <a 
-      href="${project.link}"
-      class="inline-flex items-center gap-2 text-gradient hover:opacity-80"
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      <i data-lucide="github" class="w-5 h-5"></i>
-      View Repository
-    </a>
-  `;
-  projectsContainer.appendChild(projectElement);
-});
-
-// Populate Experience
-const experienceContainer = document.getElementById('experience-container');
+// ===== Populate Experience =====
+const expContainer = document.getElementById('experience-container');
 experience.forEach(exp => {
-  const expElement = document.createElement('div');
-  expElement.className = 'relative pl-8 border-l-2 border-gradient animate-fade-in';
-  expElement.innerHTML = `
-    <div class="absolute -left-[9px] top-0">
-      <i data-lucide="timer" class="w-4 h-4 text-gradient"></i>
+  const el = document.createElement('div');
+  el.className = 'timeline-item';
+  el.innerHTML = `
+    <div class="timeline-dot"></div>
+    <h3>${exp.company}</h3>
+    <div class="timeline-meta">
+      <span class="timeline-role">${exp.role}</span>
+      <span class="timeline-period">${exp.period}</span>
+      <span class="timeline-location">📍 ${exp.location}</span>
     </div>
-    <h3 class="text-xl font-bold text-gradient">${exp.company}</h3>
-    <p class="text-lg font-semibold mb-2">${exp.role}</p>
-    <p class="text-gray-400 mb-2">${exp.period}</p>
-    <p class="text-gray-300">${exp.description}</p>
+    <ul class="timeline-bullets">
+      ${exp.bullets.map(b => `<li>${b}</li>`).join('')}
+    </ul>
   `;
-  experienceContainer.appendChild(expElement);
+  expContainer.appendChild(el);
+  observer.observe(el);
 });
 
-// Reinitialize icons after dynamic content is added
-lucide.createIcons();
+// ===== Populate Education =====
+const eduContainer = document.getElementById('education-container');
+education.forEach(edu => {
+  const el = document.createElement('div');
+  el.className = 'edu-card';
+  el.innerHTML = `
+    <div class="edu-type">${edu.type}</div>
+    <h3>${edu.degree}</h3>
+    <div class="edu-institution">${edu.institution}</div>
+    <div class="edu-gpa">GPA: ${edu.gpa}</div>
+  `;
+  eduContainer.appendChild(el);
+  observer.observe(el);
+});
+
+// ===== Navbar Scroll =====
+const navbar = document.getElementById('navbar');
+window.addEventListener('scroll', () => {
+  navbar.classList.toggle('scrolled', window.scrollY > 50);
+});
+
+// ===== Mobile Nav Toggle =====
+const navToggle = document.getElementById('nav-toggle');
+const navLinks = document.querySelector('.nav-links');
+navToggle.addEventListener('click', () => {
+  navLinks.classList.toggle('open');
+});
+navLinks.querySelectorAll('a').forEach(a => {
+  a.addEventListener('click', () => navLinks.classList.remove('open'));
+});
+
+// ===== Matrix / Particle Background =====
+const canvas = document.getElementById('matrix-bg');
+const ctx = canvas.getContext('2d');
+
+function resizeCanvas() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
+
+// Floating particles
+const particles = [];
+const PARTICLE_COUNT = 60;
+
+for (let i = 0; i < PARTICLE_COUNT; i++) {
+  particles.push({
+    x: Math.random() * canvas.width,
+    y: Math.random() * canvas.height,
+    vx: (Math.random() - 0.5) * 0.4,
+    vy: (Math.random() - 0.5) * 0.4,
+    size: Math.random() * 2 + 0.5,
+    opacity: Math.random() * 0.5 + 0.1
+  });
+}
+
+function drawParticles() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // Draw connections
+  for (let i = 0; i < particles.length; i++) {
+    for (let j = i + 1; j < particles.length; j++) {
+      const dx = particles[i].x - particles[j].x;
+      const dy = particles[i].y - particles[j].y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist < 150) {
+        ctx.beginPath();
+        ctx.moveTo(particles[i].x, particles[i].y);
+        ctx.lineTo(particles[j].x, particles[j].y);
+        ctx.strokeStyle = `rgba(0, 240, 255, ${0.06 * (1 - dist / 150)})`;
+        ctx.lineWidth = 0.5;
+        ctx.stroke();
+      }
+    }
+  }
+
+  // Draw & update particles
+  particles.forEach(p => {
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(0, 240, 255, ${p.opacity})`;
+    ctx.fill();
+
+    p.x += p.vx;
+    p.y += p.vy;
+
+    if (p.x < 0 || p.x > canvas.width) p.vx *= -1;
+    if (p.y < 0 || p.y > canvas.height) p.vy *= -1;
+  });
+
+  requestAnimationFrame(drawParticles);
+}
+
+drawParticles();
