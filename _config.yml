@@ -8,6 +8,11 @@ markdown: kramdown
 highlighter: rouge
 permalink: /posts/:year/:month/:day/:title/
 
+# Publish posts even if their timestamp is ahead of the (UTC) build time.
+# Without this, a post dated "today" in a +0530 timezone can be treated as
+# "future" during a UTC build and silently excluded from the site.
+future: true
+
 plugins:
   - jekyll-feed
   - jekyll-seo-tag
