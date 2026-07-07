@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 260" font-family="'JetBrains Mono', monospace" role="img" aria-label="Risk equals Threat times Vulnerability times Impact">
+  <defs>
+    <linearGradient id="rg" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#00f0ff"/>
+      <stop offset="1" stop-color="#00ff88"/>
+    </linearGradient>
+  </defs>
+  <rect width="900" height="260" fill="#0a0e17"/>
+  <text x="30" y="42" fill="url(#rg)" font-size="20" font-weight="700">// Risk = Threat &#215; Vulnerability &#215; Impact</text>
+
+  <!-- Threat -->
+  <g>
+    <rect x="40" y="90" width="180" height="110" rx="12" fill="#141c2e" stroke="#00f0ff" stroke-opacity="0.4"/>
+    <text x="130" y="122" fill="#00f0ff" font-size="15" font-weight="700" text-anchor="middle">Threat</text>
+    <text x="130" y="150" fill="#8892a8" font-size="11" text-anchor="middle">Potential attack or</text>
+    <text x="130" y="166" fill="#8892a8" font-size="11" text-anchor="middle">adverse event</text>
+    <text x="130" y="188" fill="#00ff88" font-size="10" text-anchor="middle">e.g. SQL injection</text>
+  </g>
+  <text x="243" y="152" fill="#e2e8f0" font-size="30" text-anchor="middle">&#215;</text>
+
+  <!-- Vulnerability -->
+  <g>
+    <rect x="270" y="90" width="180" height="110" rx="12" fill="#141c2e" stroke="#00f0ff" stroke-opacity="0.4"/>
+    <text x="360" y="122" fill="#00f0ff" font-size="15" font-weight="700" text-anchor="middle">Vulnerability</text>
+    <text x="360" y="150" fill="#8892a8" font-size="11" text-anchor="middle">Weakness that can</text>
+    <text x="360" y="166" fill="#8892a8" font-size="11" text-anchor="middle">be exploited</text>
+    <text x="360" y="188" fill="#00ff88" font-size="10" text-anchor="middle">e.g. unsanitized input</text>
+  </g>
+  <text x="473" y="152" fill="#e2e8f0" font-size="30" text-anchor="middle">&#215;</text>
+
+  <!-- Impact -->
+  <g>
+    <rect x="500" y="90" width="180" height="110" rx="12" fill="#141c2e" stroke="#a855f7" stroke-opacity="0.5"/>
+    <text x="590" y="122" fill="#a855f7" font-size="15" font-weight="700" text-anchor="middle">Impact</text>
+    <text x="590" y="150" fill="#8892a8" font-size="11" text-anchor="middle">Damage if the risk</text>
+    <text x="590" y="166" fill="#8892a8" font-size="11" text-anchor="middle">materializes</text>
+    <text x="590" y="188" fill="#00ff88" font-size="10" text-anchor="middle">e.g. data breach, fines</text>
+  </g>
+  <text x="703" y="152" fill="#e2e8f0" font-size="30" text-anchor="middle">=</text>
+
+  <!-- Risk -->
+  <g>
+    <rect x="730" y="90" width="140" height="110" rx="12" fill="rgba(0,240,255,0.06)" stroke="url(#rg)" stroke-width="2"/>
+    <text x="800" y="140" fill="url(#rg)" font-size="20" font-weight="700" text-anchor="middle">RISK</text>
+    <text x="800" y="170" fill="#8892a8" font-size="10" text-anchor="middle">prioritize this</text>
+  </g>
+</svg>

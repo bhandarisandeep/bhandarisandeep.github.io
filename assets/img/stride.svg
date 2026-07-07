@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 420" font-family="'JetBrains Mono', monospace" role="img" aria-label="STRIDE six threat categories and the security property each violates">
+  <defs>
+    <linearGradient id="sg" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#00f0ff"/>
+      <stop offset="1" stop-color="#00ff88"/>
+    </linearGradient>
+  </defs>
+  <rect width="900" height="420" fill="#0a0e17"/>
+  <text x="30" y="42" fill="url(#sg)" font-size="20" font-weight="700">// STRIDE — Threat vs. Property Violated</text>
+
+  <!-- Row template: letter chip | category | violates -->
+  <!-- S -->
+  <g>
+    <rect x="30" y="70" width="840" height="48" rx="8" fill="#141c2e" stroke="#00f0ff" stroke-opacity="0.15"/>
+    <circle cx="60" cy="94" r="16" fill="rgba(0,240,255,0.1)" stroke="#00f0ff"/>
+    <text x="60" y="99" fill="#00f0ff" font-size="16" font-weight="700" text-anchor="middle">S</text>
+    <text x="95" y="90" fill="#e2e8f0" font-size="14" font-weight="700">Spoofing</text>
+    <text x="95" y="107" fill="#8892a8" font-size="11">Pretending to be someone / something else</text>
+    <text x="855" y="99" fill="#00ff88" font-size="12" text-anchor="end">Authentication</text>
+  </g>
+  <!-- T -->
+  <g>
+    <rect x="30" y="126" width="840" height="48" rx="8" fill="#141c2e" stroke="#00f0ff" stroke-opacity="0.15"/>
+    <circle cx="60" cy="150" r="16" fill="rgba(0,240,255,0.1)" stroke="#00f0ff"/>
+    <text x="60" y="155" fill="#00f0ff" font-size="16" font-weight="700" text-anchor="middle">T</text>
+    <text x="95" y="146" fill="#e2e8f0" font-size="14" font-weight="700">Tampering</text>
+    <text x="95" y="163" fill="#8892a8" font-size="11">Modifying data or code without authorization</text>
+    <text x="855" y="155" fill="#00ff88" font-size="12" text-anchor="end">Integrity</text>
+  </g>
+  <!-- R -->
+  <g>
+    <rect x="30" y="182" width="840" height="48" rx="8" fill="#141c2e" stroke="#00f0ff" stroke-opacity="0.15"/>
+    <circle cx="60" cy="206" r="16" fill="rgba(0,240,255,0.1)" stroke="#00f0ff"/>
+    <text x="60" y="211" fill="#00f0ff" font-size="16" font-weight="700" text-anchor="middle">R</text>
+    <text x="95" y="202" fill="#e2e8f0" font-size="14" font-weight="700">Repudiation</text>
+    <text x="95" y="219" fill="#8892a8" font-size="11">Denying that an action was performed</text>
+    <text x="855" y="211" fill="#00ff88" font-size="12" text-anchor="end">Non-repudiation</text>
+  </g>
+  <!-- I -->
+  <g>
+    <rect x="30" y="238" width="840" height="48" rx="8" fill="#141c2e" stroke="#00f0ff" stroke-opacity="0.15"/>
+    <circle cx="60" cy="262" r="16" fill="rgba(0,240,255,0.1)" stroke="#00f0ff"/>
+    <text x="60" y="267" fill="#00f0ff" font-size="16" font-weight="700" text-anchor="middle">I</text>
+    <text x="95" y="258" fill="#e2e8f0" font-size="14" font-weight="700">Information Disclosure</text>
+    <text x="95" y="275" fill="#8892a8" font-size="11">Exposing information to unauthorized parties</text>
+    <text x="855" y="267" fill="#00ff88" font-size="12" text-anchor="end">Confidentiality</text>
+  </g>
+  <!-- D -->
+  <g>
+    <rect x="30" y="294" width="840" height="48" rx="8" fill="#141c2e" stroke="#00f0ff" stroke-opacity="0.15"/>
+    <circle cx="60" cy="318" r="16" fill="rgba(0,240,255,0.1)" stroke="#00f0ff"/>
+    <text x="60" y="323" fill="#00f0ff" font-size="16" font-weight="700" text-anchor="middle">D</text>
+    <text x="95" y="314" fill="#e2e8f0" font-size="14" font-weight="700">Denial of Service</text>
+    <text x="95" y="331" fill="#8892a8" font-size="11">Making resources unavailable</text>
+    <text x="855" y="323" fill="#00ff88" font-size="12" text-anchor="end">Availability</text>
+  </g>
+  <!-- E -->
+  <g>
+    <rect x="30" y="350" width="840" height="48" rx="8" fill="#141c2e" stroke="#a855f7" stroke-opacity="0.3"/>
+    <circle cx="60" cy="374" r="16" fill="rgba(168,85,247,0.12)" stroke="#a855f7"/>
+    <text x="60" y="379" fill="#a855f7" font-size="16" font-weight="700" text-anchor="middle">E</text>
+    <text x="95" y="370" fill="#e2e8f0" font-size="14" font-weight="700">Elevation of Privilege</text>
+    <text x="95" y="387" fill="#8892a8" font-size="11">Gaining higher privileges than intended</text>
+    <text x="855" y="379" fill="#00ff88" font-size="12" text-anchor="end">Authorization</text>
+  </g>
+</svg>
