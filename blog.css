@@ -28,10 +28,10 @@
 
 .post-index-item a {
   display: block;
-  padding: 1.5rem 1.8rem;
   background: var(--bg-card);
   border: 1px solid rgba(0, 240, 255, 0.08);
   border-radius: var(--radius);
+  overflow: hidden;
   transition: all 0.3s;
 }
 
@@ -40,6 +40,26 @@
   box-shadow: var(--glow);
   transform: translateY(-3px);
 }
+
+/* Thumbnail banner */
+.post-thumb {
+  width: 100%;
+  aspect-ratio: 640 / 300;
+  overflow: hidden;
+  border-bottom: 1px solid rgba(0, 240, 255, 0.08);
+}
+
+.post-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.4s ease;
+}
+
+.post-index-item a:hover .post-thumb img { transform: scale(1.04); }
+
+.post-card-body { padding: 1.5rem 1.8rem; }
 
 .post-index-item time {
   font-family: var(--font-mono);
@@ -84,6 +104,22 @@
   transition: opacity 0.2s;
 }
 .post-back:hover { opacity: 0.7; }
+
+.post-banner {
+  width: 100%;
+  aspect-ratio: 640 / 300;
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin-bottom: 2rem;
+  border: 1px solid rgba(0, 240, 255, 0.1);
+}
+
+.post-banner img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
 
 .post-header {
   margin-bottom: 2.5rem;

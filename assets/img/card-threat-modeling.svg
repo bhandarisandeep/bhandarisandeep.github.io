@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 300" font-family="'JetBrains Mono', monospace" role="img" aria-label="Threat modeling — STRIDE">
+  <defs>
+    <linearGradient id="cg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#00f0ff"/>
+      <stop offset="1" stop-color="#00ff88"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.8" cy="0.2" r="0.9">
+      <stop offset="0" stop-color="#00f0ff" stop-opacity="0.18"/>
+      <stop offset="1" stop-color="#00f0ff" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="640" height="300" fill="#0f1623"/>
+  <rect width="640" height="300" fill="url(#glow)"/>
+  <!-- shield -->
+  <g transform="translate(70 80)">
+    <path d="M60 0 L118 22 V70 C118 118 92 148 60 162 C28 148 2 118 2 70 V22 Z"
+          fill="rgba(0,240,255,0.06)" stroke="url(#cg)" stroke-width="2.5"/>
+    <text x="60" y="95" fill="url(#cg)" font-size="46" font-weight="700" text-anchor="middle">🛡</text>
+  </g>
+  <!-- STRIDE letters -->
+  <g fill="#e2e8f0" font-size="15" font-weight="700">
+    <text x="250" y="70">S <tspan fill="#8892a8" font-weight="400" font-size="12">poofing</tspan></text>
+    <text x="250" y="102">T <tspan fill="#8892a8" font-weight="400" font-size="12">ampering</tspan></text>
+    <text x="250" y="134">R <tspan fill="#8892a8" font-weight="400" font-size="12">epudiation</tspan></text>
+    <text x="250" y="166">I <tspan fill="#8892a8" font-weight="400" font-size="12">nfo Disclosure</tspan></text>
+    <text x="250" y="198">D <tspan fill="#8892a8" font-weight="400" font-size="12">enial of Service</tspan></text>
+    <text x="250" y="230">E <tspan fill="#8892a8" font-weight="400" font-size="12">levation of Priv.</tspan></text>
+  </g>
+  <text x="32" y="270" fill="url(#cg)" font-size="16" font-weight="700">// Threat Modeling &amp; STRIDE</text>
+</svg>

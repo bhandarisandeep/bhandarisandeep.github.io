@@ -3,6 +3,7 @@ layout: post
 title: "Threat Modeling: A Practical Guide to STRIDE and Beyond"
 date: 2026-07-08 14:00:00 +0530
 tags: [threat-modeling, stride, appsec, security]
+image: /assets/img/card-threat-modeling.svg
 excerpt: "How to start threat modeling, a comparison of the major methodologies, a deep dive into STRIDE with edge cases and ten worked examples, and how to move from threats to risk."
 ---
 

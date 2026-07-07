@@ -3,6 +3,7 @@ layout: post
 title: "Hello, World: Why I'm Starting This Blog"
 date: 2026-07-08 10:00:00 +0530
 tags: [meta, appsec]
+image: /assets/img/card-hello-world.svg
 excerpt: "Kicking off a space to write about application security, threat modeling, and the lessons I pick up building secure systems at scale."
 ---
 
