@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% if page.title %}{{ page.title }} · {{ site.title }}{% else %}{{ site.title }} · Blog{% endif %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ '/styles.css' | relative_url }}">
+  <link rel="stylesheet" href="{{ '/blog.css' | relative_url }}">
+  {% feed_meta %}
+  {% seo %}
+</head>
+<body>
+  <!-- Animated background canvas -->
+  <canvas id="matrix-bg"></canvas>
+
+  <!-- Navigation -->
+  <nav id="navbar" class="scrolled">
+    <div class="nav-inner">
+      <a href="{{ '/' | relative_url }}" class="nav-logo">&lt;SB/&gt;</a>
+      <div class="nav-links">
+        <a href="{{ '/#about' | relative_url }}">About</a>
+        <a href="{{ '/#skills' | relative_url }}">Skills</a>
+        <a href="{{ '/#experience' | relative_url }}">Experience</a>
+        <a href="{{ '/posts/' | relative_url }}">Blog</a>
+        <a href="{{ '/#contact' | relative_url }}">Contact</a>
+      </div>
+      <button class="nav-toggle" id="nav-toggle" aria-label="Toggle navigation">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Page content -->
+  <main class="blog-main">
+    {{ content }}
+  </main>
+
+  <!-- Footer -->
+  <footer>
+    <div class="container">
+      <p>&copy; <span id="footer-year"></span> Sandeep Bhandari. Built with ☕ and security in mind.</p>
+    </div>
+  </footer>
+
+  <script src="{{ '/script.js' | relative_url }}"></script>
+</body>
+</html>

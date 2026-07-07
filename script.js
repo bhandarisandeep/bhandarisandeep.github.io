@@ -101,7 +101,8 @@ function typeLoop() {
     setTimeout(typeLoop, 30);
   }
 }
-typeLoop();
+// Only run the typing effect on pages that have the hero element (home page)
+if (typedEl) typeLoop();
 
 // ===== Intersection Observer =====
 const observer = new IntersectionObserver((entries) => {
@@ -115,7 +116,7 @@ const observer = new IntersectionObserver((entries) => {
 
 // ===== Populate Skills =====
 const skillsContainer = document.getElementById('skills-container');
-skills.forEach(skill => {
+if (skillsContainer) skills.forEach(skill => {
   const el = document.createElement('div');
   el.className = 'skill-card';
   el.innerHTML = `
@@ -133,7 +134,7 @@ skills.forEach(skill => {
 
 // ===== Populate Experience =====
 const expContainer = document.getElementById('experience-container');
-experience.forEach(exp => {
+if (expContainer) experience.forEach(exp => {
   const el = document.createElement('div');
   el.className = 'timeline-item';
   el.innerHTML = `
@@ -154,7 +155,7 @@ experience.forEach(exp => {
 
 // ===== Populate Education =====
 const eduContainer = document.getElementById('education-container');
-education.forEach(edu => {
+if (eduContainer) education.forEach(edu => {
   const el = document.createElement('div');
   el.className = 'edu-card';
   el.innerHTML = `
@@ -169,22 +170,27 @@ education.forEach(edu => {
 
 // ===== Navbar Scroll =====
 const navbar = document.getElementById('navbar');
-window.addEventListener('scroll', () => {
-  navbar.classList.toggle('scrolled', window.scrollY > 50);
-});
+if (navbar) {
+  window.addEventListener('scroll', () => {
+    navbar.classList.toggle('scrolled', window.scrollY > 50);
+  });
+}
 
 // ===== Mobile Nav Toggle =====
 const navToggle = document.getElementById('nav-toggle');
 const navLinks = document.querySelector('.nav-links');
-navToggle.addEventListener('click', () => {
-  navLinks.classList.toggle('open');
-});
-navLinks.querySelectorAll('a').forEach(a => {
-  a.addEventListener('click', () => navLinks.classList.remove('open'));
-});
+if (navToggle && navLinks) {
+  navToggle.addEventListener('click', () => {
+    navLinks.classList.toggle('open');
+  });
+  navLinks.querySelectorAll('a').forEach(a => {
+    a.addEventListener('click', () => navLinks.classList.remove('open'));
+  });
+}
 
 // ===== Matrix / Particle Background =====
 const canvas = document.getElementById('matrix-bg');
+if (canvas) {
 const ctx = canvas.getContext('2d');
 
 function resizeCanvas() {
@@ -247,6 +253,8 @@ function drawParticles() {
 }
 
 drawParticles();
+} // end if (canvas)
 
 // ===== Dynamic Footer Year =====
-document.getElementById('footer-year').textContent = new Date().getFullYear();
+const footerYear = document.getElementById('footer-year');
+if (footerYear) footerYear.textContent = new Date().getFullYear();

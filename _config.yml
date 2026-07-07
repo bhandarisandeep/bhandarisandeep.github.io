@@ -1,0 +1,29 @@
+title: Sandeep Bhandari
+description: Application Security Engineer — notes on web/mobile security, threat modeling, and AppSec at scale.
+url: "https://bhandarisandeep.com"
+author: Sandeep Bhandari
+
+# Build settings
+markdown: kramdown
+highlighter: rouge
+permalink: /posts/:year/:month/:day/:title/
+
+plugins:
+  - jekyll-feed
+  - jekyll-seo-tag
+
+# Keep the hand-built home page and assets out of Jekyll's processing;
+# they are served as-is.
+exclude:
+  - README.md
+  - Gemfile
+  - Gemfile.lock
+  - vendor
+
+# Default layout for posts
+defaults:
+  - scope:
+      path: "_posts"
+      type: "posts"
+    values:
+      layout: "post"
