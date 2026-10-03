@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 300" font-family="'JetBrains Mono', monospace" role="img" aria-label="Before: copy files by USB stick or cloud upload. After: save to a shared folder and open it on any device">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#00f0ff"/>
+      <stop offset="1" stop-color="#00ff88"/>
+    </linearGradient>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="#00f0ff"/>
+    </marker>
+    <marker id="warrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="#ff8aa0"/>
+    </marker>
+  </defs>
+  <rect width="900" height="300" fill="#0a0e17"/>
+
+  <!-- before -->
+  <rect x="20" y="20" width="420" height="260" rx="12" fill="#1d1420" stroke="#ff5577" stroke-opacity="0.4"/>
+  <text x="40" y="52" fill="#ff8aa0" font-size="15" font-weight="700">Before: carry it</text>
+  <g fill="#141c2e" stroke="#ff5577" stroke-opacity="0.4">
+    <rect x="40" y="80"  width="170" height="54" rx="8"/>
+    <rect x="40" y="160" width="170" height="54" rx="8"/>
+    <rect x="240" y="120" width="170" height="54" rx="8"/>
+  </g>
+  <g fill="#e2e8f0" font-size="12" text-anchor="middle">
+    <text x="125" y="102">USB stick</text>
+    <text x="125" y="182">Email / cloud upload</text>
+    <text x="325" y="142">Download on other device</text>
+  </g>
+  <g stroke="#ff8aa0" stroke-width="2" marker-end="url(#warrow)" fill="none">
+    <line x1="125" y1="134" x2="125" y2="158"/>
+    <line x1="210" y1="187" x2="238" y2="150"/>
+  </g>
+  <text x="40" y="250" fill="#8892a8" font-size="11">Copy twice. Pay for cloud space. Wait for uploads.</text>
+
+  <!-- after -->
+  <rect x="460" y="20" width="420" height="260" rx="12" fill="#0f1623" stroke="#00ff88" stroke-opacity="0.4"/>
+  <text x="480" y="52" fill="#00ff88" font-size="15" font-weight="700">After: shared folder</text>
+  <g fill="#141c2e" stroke="#00f0ff" stroke-opacity="0.4">
+    <rect x="480" y="80"  width="170" height="54" rx="8"/>
+    <rect x="680" y="160" width="170" height="54" rx="8"/>
+    <rect x="480" y="160" width="170" height="54" rx="8"/>
+  </g>
+  <g fill="#e2e8f0" font-size="12" text-anchor="middle">
+    <text x="565" y="102">Save to C:\Share</text>
+    <text x="565" y="182">Open on any device</text>
+    <text x="765" y="182">Done</text>
+  </g>
+  <g stroke="#00f0ff" stroke-width="2" marker-end="url(#arrow)" fill="none">
+    <line x1="565" y1="134" x2="565" y2="158"/>
+    <line x1="652" y1="187" x2="678" y2="187"/>
+  </g>
+  <text x="480" y="250" fill="url(#g)" font-size="11" font-weight="700">25 GB copied in about 10 minutes over Wi-Fi 6</text>
+</svg>

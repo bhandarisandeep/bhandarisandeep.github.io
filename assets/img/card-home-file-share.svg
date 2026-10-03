@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 300" font-family="'JetBrains Mono', monospace" role="img" aria-label="Home file share troubleshooting">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 300" font-family="'JetBrains Mono', monospace" role="img" aria-label="Home file share: one PC shared across devices">
   <defs>
     <linearGradient id="cg" x1="0" y1="0" x2="1" y2="1">
       <stop offset="0" stop-color="#00f0ff"/>
@@ -18,13 +18,13 @@
     <text x="62" y="72" fill="url(#cg)" font-size="22" font-weight="700" text-anchor="middle">\\</text>
   </g>
   <g fill="#e2e8f0" font-size="15" font-weight="700">
-    <text x="250" y="88">Share visible,</text>
-    <text x="250" y="114">access denied?</text>
+    <text x="250" y="88">Small home file share</text>
+    <text x="250" y="114">over your own Wi-Fi</text>
   </g>
   <g fill="#8892a8" font-size="12">
-    <text x="250" y="150">check 3 permission gates</text>
-    <text x="250" y="170">read the Windows logon code</text>
-    <text x="250" y="190">test the share directly</text>
+    <text x="250" y="150">one PC, every device</text>
+    <text x="250" y="170">no NAS, no extra cost</text>
+    <text x="250" y="190">set up with SMB in minutes</text>
   </g>
-  <text x="32" y="270" fill="url(#cg)" font-size="16" font-weight="700">// Home File Share Troubleshooting</text>
+  <text x="32" y="270" fill="url(#cg)" font-size="16" font-weight="700">// Windows SMB at Home</text>
 </svg>
