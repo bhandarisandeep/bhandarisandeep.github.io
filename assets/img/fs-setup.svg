@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 300" font-family="'JetBrains Mono', monospace" role="img" aria-label="Home file share: client to router to PC, with three permission gates on the PC">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#00f0ff"/>
+      <stop offset="1" stop-color="#00ff88"/>
+    </linearGradient>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="#00f0ff"/>
+    </marker>
+  </defs>
+  <rect width="900" height="300" fill="#0a0e17"/>
+  <text x="30" y="36" fill="url(#g)" font-size="18" font-weight="700">// Home File Share: What a Request Passes Through</text>
+
+  <!-- client -->
+  <rect x="30" y="100" width="170" height="90" rx="10" fill="#141c2e" stroke="#00f0ff" stroke-opacity="0.4"/>
+  <text x="115" y="136" fill="#e2e8f0" font-size="13" font-weight="700" text-anchor="middle">Client device</text>
+  <text x="115" y="158" fill="#8892a8" font-size="11" text-anchor="middle">Mac or Windows</text>
+
+  <!-- router -->
+  <rect x="265" y="100" width="170" height="90" rx="10" fill="#141c2e" stroke="#00f0ff" stroke-opacity="0.4"/>
+  <text x="350" y="136" fill="#e2e8f0" font-size="13" font-weight="700" text-anchor="middle">Wi-Fi router</text>
+  <text x="350" y="158" fill="#8892a8" font-size="11" text-anchor="middle">LAN 192.168.x.x</text>
+
+  <!-- arrows -->
+  <line x1="200" y1="145" x2="262" y2="145" stroke="#00f0ff" stroke-width="2" marker-end="url(#arrow)"/>
+  <line x1="435" y1="145" x2="497" y2="145" stroke="#00f0ff" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="449" y="132" fill="#8892a8" font-size="10" text-anchor="middle">SMB</text>
+  <text x="449" y="170" fill="#8892a8" font-size="10" text-anchor="middle">port 445</text>
+
+  <!-- PC with gates -->
+  <rect x="500" y="62" width="370" height="200" rx="12" fill="#0f1623" stroke="#00ff88" stroke-opacity="0.35"/>
+  <text x="520" y="88" fill="#00ff88" font-size="13" font-weight="700">Windows PC  (file share host)</text>
+
+  <g>
+    <rect x="520" y="104" width="330" height="40" rx="6" fill="#141c2e" stroke="#00f0ff" stroke-opacity="0.4"/>
+    <text x="536" y="129" fill="#e2e8f0" font-size="12"><tspan fill="#00f0ff" font-weight="700">1</tspan>  Firewall: port 445 open (Private)</text>
+  </g>
+  <g>
+    <rect x="520" y="156" width="330" height="40" rx="6" fill="#141c2e" stroke="#00f0ff" stroke-opacity="0.4"/>
+    <text x="536" y="181" fill="#e2e8f0" font-size="12"><tspan fill="#00f0ff" font-weight="700">2</tspan>  Share permission: homeshare = Full</text>
+  </g>
+  <g>
+    <rect x="520" y="208" width="330" height="40" rx="6" fill="#141c2e" stroke="#00f0ff" stroke-opacity="0.4"/>
+    <text x="536" y="233" fill="#e2e8f0" font-size="12"><tspan fill="#00f0ff" font-weight="700">3</tspan>  NTFS: homeshare = Modify</text>
+  </g>
+
+  <text x="30" y="282" fill="#8892a8" font-size="11">All three gates must allow the request. Any one of them can produce "no permission".</text>
+</svg>

@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 300" font-family="'JetBrains Mono', monospace" role="img" aria-label="Home file share troubleshooting">
+  <defs>
+    <linearGradient id="cg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#00f0ff"/>
+      <stop offset="1" stop-color="#00ff88"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.8" cy="0.2" r="0.9">
+      <stop offset="0" stop-color="#00f0ff" stop-opacity="0.18"/>
+      <stop offset="1" stop-color="#00f0ff" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="640" height="300" fill="#0f1623"/>
+  <rect width="640" height="300" fill="url(#glow)"/>
+  <!-- folder icon -->
+  <g transform="translate(70 90)">
+    <path d="M0 14 Q0 4 10 4 H48 L60 18 H116 Q124 18 124 26 V96 Q124 106 114 106 H10 Q0 106 0 96 Z"
+          fill="rgba(0,240,255,0.06)" stroke="url(#cg)" stroke-width="2.5"/>
+    <text x="62" y="72" fill="url(#cg)" font-size="22" font-weight="700" text-anchor="middle">\\</text>
+  </g>
+  <g fill="#e2e8f0" font-size="15" font-weight="700">
+    <text x="250" y="88">Share visible,</text>
+    <text x="250" y="114">access denied?</text>
+  </g>
+  <g fill="#8892a8" font-size="12">
+    <text x="250" y="150">check 3 permission gates</text>
+    <text x="250" y="170">read the Windows logon code</text>
+    <text x="250" y="190">test the share directly</text>
+  </g>
+  <text x="32" y="270" fill="url(#cg)" font-size="16" font-weight="700">// Home File Share Troubleshooting</text>
+</svg>
