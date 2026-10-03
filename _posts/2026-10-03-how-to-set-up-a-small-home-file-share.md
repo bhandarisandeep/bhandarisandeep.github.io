@@ -79,6 +79,34 @@ it practical:
 Your speed depends on your router, the distance to it, and what else is using the
 network. Wired Ethernet is faster and more consistent if you can run a cable to the PC.
 
+## A Note on USB Drives Between Mac and Windows
+
+A USB stick is still the simplest way to move files when the network isn't an option.
+But a drive formatted for one system often doesn't work on the other, and the error
+doesn't always explain why.
+
+| Format | Windows | macOS | Limits and notes |
+|---|---|---|---|
+| **exFAT** | Read and write | Read and write | Best choice for a drive shared between Mac and Windows. No practical file-size limit for everyday use. |
+| **FAT32** | Read and write | Read and write | Works on both, but a single file can't be larger than 4 GB. |
+| **NTFS** | Read and write | Read only by default | macOS can see the files but can't copy to the drive without a third-party tool. |
+| **APFS / Mac OS Extended** | Can't read | Read and write | Mac-only. Windows doesn't see the drive. |
+| **ext4** | Can't read | Can't read | Linux-only, unless you install extra tools. |
+
+**What to do:** format the drive as **exFAT** using Disk Utility on the Mac, or the
+Windows "Format" option, and use it for files you move between machines.
+
+Two more things to watch for:
+
+- **Mac junk files.** On exFAT and FAT32 drives, macOS writes hidden helper files
+  (names starting with `._`) and `.DS_Store` files. Windows shows them as clutter, and
+  they're harmless. Delete them if they bother you.
+- **Eject before unplugging.** On both systems, eject the drive from the OS first.
+  Pulling it out during a copy is the most common way to corrupt the files on it.
+
+If a drive shows up on the Mac but you can't write to it, check the format before
+you assume it's broken. NTFS is the usual cause.
+
 ## Setup Steps
 
 Everything below runs on the **Windows PC that will hold the files**. Open PowerShell
