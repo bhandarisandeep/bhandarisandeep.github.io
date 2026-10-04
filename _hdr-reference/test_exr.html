@@ -1,0 +1,103 @@
+<!doctype html>
+<title>exr.js unit tests</title>
+<body>
+<pre id="out">running...</pre>
+<script type="module">
+import { decodeExr, ExrParseError } from '../hdr-tool/exr.js';
+
+const results = [];
+function assert(name, cond, detail) {
+  results.push({ name, ok: !!cond, detail: detail || '' });
+}
+
+async function run() {
+  const [exrBuf, expected] = await Promise.all([
+    fetch('./test_fixture.exr').then((r) => r.arrayBuffer()),
+    fetch('./test_fixture_expected.json').then((r) => r.json()),
+  ]);
+
+  const decoded = await decodeExr(exrBuf);
+  assert('width matches', decoded.width === expected.width, `${decoded.width} vs ${expected.width}`);
+  assert('height matches', decoded.height === expected.height, `${decoded.height} vs ${expected.height}`);
+  assert('has R/G/B', decoded.R && decoded.G && decoded.B);
+  assert('no alpha channel', decoded.A === null);
+
+  // HALF precision is coarse; allow a small relative tolerance.
+  function maxRelErr(got, exp) {
+    let maxErr = 0;
+    for (let i = 0; i < exp.length; i++) {
+      const denom = Math.max(1e-6, Math.abs(exp[i]));
+      maxErr = Math.max(maxErr, Math.abs(got[i] - exp[i]) / denom);
+    }
+    return maxErr;
+  }
+
+  const errR = maxRelErr(decoded.R, expected.R);
+  const errG = maxRelErr(decoded.G, expected.G);
+  const errB = maxRelErr(decoded.B, expected.B);
+  assert('R channel matches (rel err < 0.01)', errR < 0.01, `maxRelErr=${errR}`);
+  assert('G channel matches (rel err < 0.01)', errG < 0.01, `maxRelErr=${errG}`);
+  assert('B channel matches (rel err < 0.01)', errB < 0.01, `maxRelErr=${errB}`);
+
+  // B channel includes values > 1.0 -- confirms real HDR data round-trips, not just clamped/clipped data.
+  const maxB = Math.max(...decoded.B);
+  assert('B channel contains values > 1.0 (HDR data)', maxB > 1.0, `max B = ${maxB}`);
+
+  // Spot-check a pixel in the SECOND block (line 17, beyond the first 16-line block)
+  // to confirm multi-block offset-table handling is correct.
+  const y = 17,
+    x = 3;
+  const idx = y * decoded.width + x;
+  const gotB = decoded.B[idx];
+  const expB = expected.B[idx];
+  assert(
+    `pixel (${x},${y}) in second block matches`,
+    Math.abs(gotB - expB) / expB < 0.01,
+    `got ${gotB}, expected ${expB}`
+  );
+
+  // --- ZIPS compression path (1 line per block, 7 blocks) ---
+  const [zipsBuf, zipsExpected] = await Promise.all([
+    fetch('./test_fixture_zips.exr').then((r) => r.arrayBuffer()),
+    fetch('./test_fixture_zips_expected.json').then((r) => r.json()),
+  ]);
+  const zipsDecoded = await decodeExr(zipsBuf);
+  assert('ZIPS: width matches', zipsDecoded.width === zipsExpected.width);
+  assert('ZIPS: height matches', zipsDecoded.height === zipsExpected.height);
+  const zErrR = maxRelErr(zipsDecoded.R, zipsExpected.R);
+  const zErrG = maxRelErr(zipsDecoded.G, zipsExpected.G);
+  const zErrB = maxRelErr(zipsDecoded.B, zipsExpected.B);
+  assert('ZIPS: R channel matches', zErrR < 0.01, `maxRelErr=${zErrR}`);
+  assert('ZIPS: G channel matches (incl. values > 1.0)', zErrG < 0.01, `maxRelErr=${zErrG}`);
+  assert('ZIPS: B channel matches', zErrB < 0.01, `maxRelErr=${zErrB}`);
+  assert('ZIPS: last row (block 6) matches', Math.abs(zipsDecoded.G[6 * 5] - zipsExpected.G[6 * 5]) / zipsExpected.G[6 * 5] < 0.01);
+
+  // --- unsupported compression (PIZ) gives a clear, specific error ---
+  try {
+    const pizBuf = await fetch('./test_fixture_piz.exr').then((r) => r.arrayBuffer());
+    await decodeExr(pizBuf);
+    assert('PIZ compression throws', false, 'did not throw');
+  } catch (e) {
+    assert(
+      'PIZ compression throws ExrParseError with clear message',
+      e instanceof ExrParseError && e.message === 'Export EXR with ZIP compression',
+      e.message
+    );
+  }
+
+  report();
+}
+
+function report() {
+  const failed = results.filter((r) => !r.ok);
+  const lines = results.map((r) => `${r.ok ? 'PASS' : 'FAIL'}  ${r.name}` + (r.ok ? '' : `  (${r.detail})`));
+  const summary = `${results.length - failed.length}/${results.length} passed`;
+  document.getElementById('out').textContent = lines.join('\n') + '\n\n' + summary;
+  document.title = failed.length === 0 ? `ALL_PASS:${summary}` : `SOME_FAIL:${summary}`;
+}
+
+run().catch((e) => {
+  document.getElementById('out').textContent = 'ERROR: ' + e.stack;
+  document.title = 'ERROR:' + e.message;
+});
+</script>
