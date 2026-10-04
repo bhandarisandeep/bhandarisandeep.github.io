@@ -1,0 +1,144 @@
+<!doctype html>
+<title>ultrahdr.js unit tests</title>
+<body>
+<pre id="out">running...</pre>
+<script type="module">
+import { buildGainMapJpeg, buildUltraHdrJpeg, formatG, _internal } from '../hdr-tool/ultrahdr.js';
+
+const results = [];
+function assertEq(name, got, expected) {
+  const gotStr = got instanceof Uint8Array ? bytesToHex(got) : String(got);
+  const expStr = expected instanceof Uint8Array ? bytesToHex(expected) : String(expected);
+  const ok = gotStr === expStr;
+  results.push({ name, ok, got: gotStr, expected: expStr });
+}
+
+function bytesToHex(b) {
+  return [...b].map((x) => x.toString(16).padStart(2, '0')).join('');
+}
+function hexToBytes(h) {
+  const out = new Uint8Array(h.length / 2);
+  for (let i = 0; i < out.length; i++) out[i] = parseInt(h.substr(i * 2, 2), 16);
+  return out;
+}
+
+// --- Known test case from BRIEF.md, verified against the real reference file ---
+const metadata = {
+  gainMapMin: 0,
+  gainMapMax: Math.log2(6.0),
+  gamma: 1,
+  offsetSdr: 1e-7,
+  offsetHdr: 1e-7,
+  hdrCapacityMin: 0,
+  hdrCapacityMax: Math.log2(6.0),
+};
+
+const EXPECTED_ISO91_HEX =
+  '75726e3a69736f3a7374643a69736f3a74733a32313439363a2d31000000000040000000000000000100a5700700400000000000000000000100a570070040000000000001000000010000004d2de544770000004d2de54477';
+const EXPECTED_MPF_HEX =
+  '4d5046004d4d002a000000080003b00000070000000430313030b00100040000000100000002b00200070000002000000032000000000003000000057efc0000000000000000000000000000563e0005764d00000000';
+
+// ISO91 segment bytes include the FF E2 marker + 2-byte length; strip those to compare body.
+const iso91Seg = _internal.buildIso91Segment(metadata);
+assertEq('ISO91 marker', bytesToHex(iso91Seg.slice(0, 2)), 'ffe2');
+assertEq('ISO91 body matches reference hex', iso91Seg.slice(4), hexToBytes(EXPECTED_ISO91_HEX));
+
+const mpfSeg = _internal.buildMpfSegment(360188, 22078, 357965);
+assertEq('MPF marker', bytesToHex(mpfSeg.slice(0, 2)), 'ffe2');
+assertEq('MPF body matches reference hex', mpfSeg.slice(4), hexToBytes(EXPECTED_MPF_HEX));
+
+// --- formatG tests ---
+assertEq('formatG(0)', formatG(0), '0');
+assertEq('formatG(1)', formatG(1), '1');
+assertEq('formatG(log2(6))', formatG(Math.log2(6.0)), '2.58496');
+assertEq('formatG(1e-7)', formatG(1e-7), '1e-07');
+
+// --- XMP parses as valid XML ---
+const parser = new DOMParser();
+const primaryXmlStr = `<root xmlns:rdf="x" xmlns:x="y">` + _internal.buildPrimaryXmpXml(22078) + `</root>`;
+const primaryDoc = parser.parseFromString(primaryXmlStr, 'application/xml');
+assertEq('primary XMP has no parse error', primaryDoc.getElementsByTagName('parsererror').length, 0);
+
+const gainMapXmlStr = `<root xmlns:rdf="x" xmlns:x="y">` + _internal.buildGainMapXmpXml(metadata) + `</root>`;
+const gainMapDoc = parser.parseFromString(gainMapXmlStr, 'application/xml');
+assertEq('gainmap XMP has no parse error', gainMapDoc.getElementsByTagName('parsererror').length, 0);
+
+// --- End-to-end container assembly using real canvas-encoded JPEGs ---
+async function canvasJpeg(w, h, fill) {
+  const c = new OffscreenCanvas(w, h);
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = fill;
+  ctx.fillRect(0, 0, w, h);
+  const blob = await c.convertToBlob({ type: 'image/jpeg', quality: 0.95 });
+  return new Uint8Array(await blob.arrayBuffer());
+}
+
+async function runE2E() {
+  const sdr = await canvasJpeg(8, 8, '#4488cc');
+  const gray = await canvasJpeg(4, 4, '#808080');
+  const gainMapJpeg = buildGainMapJpeg(gray, metadata);
+  assertEq('gainmap JPEG starts with SOI', bytesToHex(gainMapJpeg.slice(0, 2)), 'ffd8');
+  assertEq('gainmap JPEG ends with EOI', bytesToHex(gainMapJpeg.slice(-2)), 'ffd9');
+
+  const container = buildUltraHdrJpeg(sdr, gainMapJpeg, metadata);
+  assertEq('container starts with SOI', bytesToHex(container.slice(0, 2)), 'ffd8');
+  assertEq('container ends with EOI', bytesToHex(container.slice(-2)), 'ffd9');
+
+  // Parse the container back out: find primary EOI, confirm gain map starts right after
+  // and its SOI offset matches what the MPF segment claims.
+  let i = 2,
+    primaryEoiEnd = -1;
+  while (i < container.length - 1) {
+    if (container[i] !== 0xff) {
+      i++;
+      continue;
+    }
+    const marker = container[i + 1];
+    if (marker === 0xd9) {
+      primaryEoiEnd = i + 2;
+      break;
+    }
+    if (marker === 0x01 || (marker >= 0xd0 && marker <= 0xd7)) {
+      i += 2;
+      continue;
+    }
+    if (marker === 0xda) {
+      // scan to next real marker
+      const hdrLen = (container[i + 2] << 8) | container[i + 3];
+      let j = i + 2 + hdrLen;
+      while (j < container.length - 1) {
+        if (container[j] === 0xff && container[j + 1] !== 0x00 && !(container[j + 1] >= 0xd0 && container[j + 1] <= 0xd7)) break;
+        j++;
+      }
+      i = j;
+      continue;
+    }
+    const len = (container[i + 2] << 8) | container[i + 3];
+    i += 2 + len;
+  }
+  assertEq('found primary EOI', primaryEoiEnd > 0, true);
+  assertEq(
+    'gain map SOI immediately follows primary EOI',
+    bytesToHex(container.slice(primaryEoiEnd, primaryEoiEnd + 2)),
+    'ffd8'
+  );
+  assertEq('primary length matches EOI position', primaryEoiEnd, container.length - gainMapJpeg.length);
+
+  report();
+}
+
+function report() {
+  const failed = results.filter((r) => !r.ok);
+  const lines = results.map(
+    (r) => `${r.ok ? 'PASS' : 'FAIL'}  ${r.name}` + (r.ok ? '' : `\n  got:      ${r.got}\n  expected: ${r.expected}`)
+  );
+  const summary = `${results.length - failed.length}/${results.length} passed`;
+  document.getElementById('out').textContent = lines.join('\n') + '\n\n' + summary;
+  document.title = failed.length === 0 ? `ALL_PASS:${summary}` : `SOME_FAIL:${summary}`;
+}
+
+runE2E().catch((e) => {
+  document.getElementById('out').textContent = 'ERROR: ' + e.stack;
+  document.title = 'ERROR:' + e.message;
+});
+</script>
