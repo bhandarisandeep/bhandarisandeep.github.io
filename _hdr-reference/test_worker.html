@@ -1,0 +1,194 @@
+<!doctype html>
+<title>worker.js pipeline test</title>
+<body>
+<pre id="out">running...</pre>
+<script type="module">
+const results = [];
+function assert(name, cond, detail) {
+  results.push({ name, ok: !!cond, detail: detail || '' });
+}
+
+function parseJpegSegments(bytes) {
+  const segs = [];
+  let i = 0;
+  while (i < bytes.length - 1) {
+    if (bytes[i] !== 0xff) {
+      i++;
+      continue;
+    }
+    const marker = bytes[i + 1];
+    if (marker === 0xd8) {
+      segs.push({ marker: 'SOI', start: i });
+      i += 2;
+      continue;
+    }
+    if (marker === 0xd9) {
+      segs.push({ marker: 'EOI', start: i });
+      i += 2;
+      continue;
+    }
+    if (marker === 0x01 || (marker >= 0xd0 && marker <= 0xd7)) {
+      i += 2;
+      continue;
+    }
+    if (marker === 0xda) {
+      const len = (bytes[i + 2] << 8) | bytes[i + 3];
+      let j = i + 2 + len;
+      while (j < bytes.length - 1) {
+        if (bytes[j] === 0xff && bytes[j + 1] !== 0x00 && !(bytes[j + 1] >= 0xd0 && bytes[j + 1] <= 0xd7)) break;
+        j++;
+      }
+      segs.push({ marker: 'SOS', start: i, end: j });
+      i = j;
+      continue;
+    }
+    const len = (bytes[i + 2] << 8) | bytes[i + 3];
+    const ident = String.fromCharCode(...bytes.slice(i + 4, Math.min(i + 4 + 16, i + 2 + len)));
+    segs.push({ marker: 'APP' + (marker - 0xe0), raw: marker, start: i, len, ident, end: i + 2 + len });
+    i += 2 + len;
+  }
+  return segs;
+}
+
+async function run() {
+  const t0 = performance.now();
+  const sdrBuf = await fetch('./test_input_1080.jpg').then((r) => r.arrayBuffer());
+
+  document.title = 'creating worker...';
+  const worker = new Worker('../hdr-tool/worker.js', { type: 'module' });
+  const progressEvents = [];
+
+  const resultPromise = new Promise((resolve, reject) => {
+    worker.onmessage = (ev) => {
+      const msg = ev.data;
+      document.title = 'msg:' + msg.type + (msg.stage ? ':' + msg.stage : '');
+      if (msg.type === 'progress') progressEvents.push(msg);
+      else if (msg.type === 'result') resolve(msg);
+      else if (msg.type === 'error') reject(new Error('worker error: ' + msg.message));
+    };
+    worker.onerror = (e) => {
+      document.title = 'WORKER_ONERROR';
+      reject(e.error || new Error('onerror: ' + e.message + ' at ' + e.filename + ':' + e.lineno));
+    };
+    worker.onmessageerror = (e) => {
+      document.title = 'WORKER_MESSAGEERROR';
+      reject(new Error('worker messageerror'));
+    };
+  });
+
+  const timeoutPromise = new Promise((_, reject) =>
+    setTimeout(() => reject(new Error('TIMEOUT after 25s, last title: ' + document.title)), 25000)
+  );
+
+  worker.postMessage(
+    {
+      type: 'process',
+      id: 1,
+      sdrBytes: sdrBuf,
+      sdrMime: 'image/jpeg',
+      exrBytes: null,
+      skyBoost: 2.6,
+      lightBoost: 6.0,
+      targetWidth: 1080,
+      wantGlowMap: true,
+    },
+    [sdrBuf]
+  );
+
+  const result = await Promise.race([resultPromise, timeoutPromise]);
+  const elapsed = performance.now() - t0;
+
+  assert('progress events received', progressEvents.length > 0, `${progressEvents.length} events`);
+  assert('did not use EXR (none provided)', result.usedExr === false);
+  assert('maxLog equals log2(6.0) with default sliders', Math.abs(result.maxLog - Math.log2(6.0)) < 1e-6, `maxLog=${result.maxLog}`);
+  assert('output width is 1080', result.width === 1080, `got ${result.width}`);
+  assert('glow map preview produced', result.glowMapPreviewBytes && result.glowMapPreviewBytes.length > 0);
+
+  const finalBytes = result.finalBytes;
+  assert('container produced non-trivial bytes', finalBytes.length > 10000, `${finalBytes.length} bytes`);
+
+  const segs = parseJpegSegments(finalBytes);
+  const markers = segs.map((s) => s.marker);
+  assert('starts with SOI', markers[0] === 'SOI');
+  assert('ends with EOI', markers[markers.length - 1] === 'EOI');
+
+  // Two SOI/EOI pairs expected (primary + gain map)
+  const soiCount = markers.filter((m) => m === 'SOI').length;
+  const eoiCount = markers.filter((m) => m === 'EOI').length;
+  assert('exactly 2 SOI markers (primary + gainmap)', soiCount === 2, `got ${soiCount}`);
+  assert('exactly 2 EOI markers (primary + gainmap)', eoiCount === 2, `got ${eoiCount}`);
+
+  // Expected segment types present
+  const app1Count = segs.filter((s) => s.marker === 'APP1').length;
+  const app2Count = segs.filter((s) => s.marker === 'APP2').length;
+  assert('2 APP1 (XMP) segments', app1Count === 2, `got ${app1Count}`);
+  assert('4 APP2 segments (ICC, ISO34, MPF, ISO91)', app2Count === 4, `got ${app2Count}`);
+
+  // Find the gain map's XMP segment (second APP1) and check GainMapMax text
+  const app1Segs = segs.filter((s) => s.marker === 'APP1');
+  const gainMapXmpBytes = finalBytes.slice(app1Segs[1].start + 4, app1Segs[1].end);
+  const gainMapXmpText = new TextDecoder('latin1').decode(gainMapXmpBytes);
+  assert(
+    'gain map XMP has GainMapMax="2.58496" (matches reference)',
+    gainMapXmpText.includes('GainMapMax="2.58496"'),
+    gainMapXmpText.slice(0, 200)
+  );
+  assert(
+    'gain map XMP has HDRCapacityMax="2.58496" (matches reference)',
+    gainMapXmpText.includes('HDRCapacityMax="2.58496"')
+  );
+
+  // Find primary EOI, confirm gain map SOI immediately follows (MPF layout check)
+  const primaryEoi = segs.find((s) => s.marker === 'EOI');
+  const gainMapSoiIdx = segs.findIndex((s) => s.marker === 'SOI' && s.start > primaryEoi.start);
+  assert(
+    'gain map SOI immediately follows primary EOI',
+    segs[gainMapSoiIdx].start === primaryEoi.start + 2,
+    `gap=${segs[gainMapSoiIdx].start - (primaryEoi.start + 2)}`
+  );
+
+  // Decode the primary image back to confirm it's a valid, viewable JPEG
+  const primaryBytes = finalBytes.slice(0, primaryEoi.start + 2);
+  const primaryBlob = new Blob([primaryBytes], { type: 'image/jpeg' });
+  try {
+    const bitmap = await createImageBitmap(primaryBlob);
+    assert('primary image decodes as valid JPEG', bitmap.width === 1080, `decoded ${bitmap.width}x${bitmap.height}`);
+    bitmap.close();
+  } catch (e) {
+    assert('primary image decodes as valid JPEG', false, e.message);
+  }
+
+  // Decode the gain map image back too
+  const gainMapBytes = finalBytes.slice(primaryEoi.start + 2);
+  const gainMapBlob = new Blob([gainMapBytes], { type: 'image/jpeg' });
+  try {
+    const bitmap = await createImageBitmap(gainMapBlob);
+    assert(
+      'gain map image decodes as valid JPEG, half resolution',
+      bitmap.width === 540,
+      `decoded ${bitmap.width}x${bitmap.height}`
+    );
+    bitmap.close();
+  } catch (e) {
+    assert('gain map image decodes as valid JPEG', false, e.message);
+  }
+
+  assert('pipeline completed in reasonable time (<10s)', elapsed < 10000, `${elapsed.toFixed(0)}ms`);
+
+  worker.terminate();
+  report(elapsed, progressEvents);
+}
+
+function report(elapsed, progressEvents) {
+  const failed = results.filter((r) => !r.ok);
+  const lines = results.map((r) => `${r.ok ? 'PASS' : 'FAIL'}  ${r.name}` + (r.ok ? '' : `\n  (${r.detail})`));
+  const summary = `${results.length - failed.length}/${results.length} passed, ${elapsed.toFixed(0)}ms, stages: ${progressEvents.map((p) => p.stage).join(' -> ')}`;
+  document.getElementById('out').textContent = lines.join('\n') + '\n\n' + summary;
+  document.title = failed.length === 0 ? `ALL_PASS:${summary}` : `SOME_FAIL:${summary}`;
+}
+
+run().catch((e) => {
+  document.getElementById('out').textContent = 'ERROR: ' + (e.stack || e.message || e);
+  document.title = 'ERROR:' + (e.message || String(e));
+});
+</script>

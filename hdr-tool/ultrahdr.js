@@ -364,6 +364,48 @@ function jpegEoiEnd(bytes) {
   return end;
 }
 
+// OffscreenCanvas.convertToBlob({type:'image/jpeg'}) auto-embeds its own
+// ICC_PROFILE APP2 segment right after APP0. We always want exactly one ICC
+// segment at our own chosen position (primary image only -- the reference's
+// gain-map image has none), so find and remove any such segment from the
+// canvas output's [scanStart, scanEnd) range, returning its payload (the
+// profile bytes themselves, with the "ICC_PROFILE\0" + chunk-index header
+// stripped) so callers can reuse the browser's own profile instead of a
+// vendored fallback.
+function extractAndRemoveIccSegment(bytes, scanStart, scanEnd) {
+  let i = scanStart;
+  while (i < scanEnd - 1) {
+    if (bytes[i] !== 0xff) {
+      i++;
+      continue;
+    }
+    const marker = bytes[i + 1];
+    if (marker === 0x01 || (marker >= 0xd0 && marker <= 0xd7)) {
+      i += 2;
+      continue;
+    }
+    const len = (bytes[i + 2] << 8) | bytes[i + 3];
+    if (marker === 0xe2) {
+      const bodyStart = i + 4;
+      const ident = bytes.slice(bodyStart, bodyStart + 12);
+      if (asciiOf(ident) === 'ICC_PROFILE\0') {
+        const segEnd = i + 2 + len;
+        const iccPayload = bytes.slice(bodyStart + 14, segEnd); // skip ident(12) + chunk seq/count(2)
+        const rest = concatBytes([bytes.slice(scanStart, i), bytes.slice(segEnd, scanEnd)]);
+        return { iccPayload, rest };
+      }
+    }
+    i += 2 + len;
+  }
+  return { iccPayload: null, rest: bytes.slice(scanStart, scanEnd) };
+}
+
+function asciiOf(bytes) {
+  let s = '';
+  for (let i = 0; i < bytes.length; i++) s += String.fromCharCode(bytes[i]);
+  return s;
+}
+
 // ---------------------------------------------------------------------------
 // Public API
 // ---------------------------------------------------------------------------
@@ -376,13 +418,21 @@ function jpegEoiEnd(bytes) {
  */
 export function buildGainMapJpeg(grayscaleJpegBytes, metadata) {
   const bytes = grayscaleJpegBytes;
-  const soi = bytes.slice(0, jpegAfterSoi(bytes));
-  const rest = bytes.slice(jpegAfterSoi(bytes), jpegEoiEnd(bytes));
+  const soiEnd = jpegAfterSoi(bytes);
+  const afterApp0 = jpegEndOfFirstApp0(bytes);
+  const sosStart = jpegSosStart(bytes);
+  const eoiEnd = jpegEoiEnd(bytes);
+
+  const soi = bytes.slice(0, soiEnd);
+  const app0 = bytes.slice(soiEnd, afterApp0);
+  // the reference gain-map image has no ICC segment -- drop the canvas's auto-embedded one
+  const { rest: middleNoIcc } = extractAndRemoveIccSegment(bytes, afterApp0, sosStart);
+  const tail = bytes.slice(sosStart, eoiEnd);
 
   const xmp = appSegment(0xe1, XMP_IDENT, strBytes(buildGainMapXmpXml(metadata)));
   const iso91 = buildIso91Segment(metadata);
 
-  return concatBytes([soi, xmp, iso91, rest]);
+  return concatBytes([soi, xmp, iso91, app0, middleNoIcc, tail]);
 }
 
 /**
@@ -398,11 +448,14 @@ export function buildUltraHdrJpeg(sdrJpegBytes, gainMapJpegBytes, metadata) {
   const eoiEnd = jpegEoiEnd(sdrJpegBytes);
 
   const head = sdrJpegBytes.slice(0, afterApp0); // SOI [+ original APP0]
-  const middle = sdrJpegBytes.slice(afterApp0, sosStart); // DQT/SOF/DHT, opaque
+  // strip the canvas's own auto-embedded ICC segment from the opaque middle blob;
+  // reuse its profile bytes (the browser's own working colour space) instead of
+  // our vendored fallback when present, and place it at the verified position.
+  const { iccPayload, rest: middle } = extractAndRemoveIccSegment(sdrJpegBytes, afterApp0, sosStart);
   const tail = sdrJpegBytes.slice(sosStart, eoiEnd); // SOS scan data...EOI
 
   const xmp = appSegment(0xe1, XMP_IDENT, strBytes(buildPrimaryXmpXml(gainMapJpegBytes.length)));
-  const icc = appSegment(0xe2, strBytes('ICC_PROFILE\0\x01\x01'), base64ToBytes(SRGB_ICC_BASE64));
+  const icc = appSegment(0xe2, strBytes('ICC_PROFILE\0\x01\x01'), iccPayload || base64ToBytes(SRGB_ICC_BASE64));
   const iso34 = buildIso34Segment();
 
   const preMpf = concatBytes([head, xmp, icc, iso34, middle]);
