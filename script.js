@@ -258,3 +258,40 @@ drawParticles();
 // ===== Dynamic Footer Year =====
 const footerYear = document.getElementById('footer-year');
 if (footerYear) footerYear.textContent = new Date().getFullYear();
+
+// ===== Blog: tag filter + search =====
+const tagFilterBar = document.getElementById('tag-filter-bar');
+const postItems = document.querySelectorAll('.post-index-item');
+
+if (tagFilterBar && postItems.length) {
+  const postSearchInput = document.getElementById('post-search-input');
+  const postFilterEmpty = document.getElementById('post-filter-empty');
+  let activeTag = 'all';
+
+  function applyPostFilters() {
+    const query = (postSearchInput ? postSearchInput.value : '').trim().toLowerCase();
+    let visibleCount = 0;
+
+    postItems.forEach(item => {
+      const tags = (item.dataset.tags || '').split(' ');
+      const search = item.dataset.search || '';
+      const matchesTag = activeTag === 'all' || tags.includes(activeTag);
+      const matchesQuery = !query || search.includes(query);
+      const visible = matchesTag && matchesQuery;
+      item.style.display = visible ? '' : 'none';
+      if (visible) visibleCount++;
+    });
+
+    if (postFilterEmpty) postFilterEmpty.style.display = visibleCount ? 'none' : 'block';
+  }
+
+  tagFilterBar.querySelectorAll('.tag-filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      activeTag = btn.dataset.tag;
+      tagFilterBar.querySelectorAll('.tag-filter-btn').forEach(b => b.classList.toggle('active', b === btn));
+      applyPostFilters();
+    });
+  });
+
+  if (postSearchInput) postSearchInput.addEventListener('input', applyPostFilters);
+}

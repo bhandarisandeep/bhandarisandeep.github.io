@@ -2,7 +2,7 @@
 layout: post
 title: "How to Set Up a Small Home File Share to Transfer Files Within Your Network"
 date: 2026-10-03 10:00:00 +0530
-tags: [windows, smb, networking, homelab, how-to]
+tags: [windows, smb, networking, homelab, how-to, hobby-project, beginner]
 image: /assets/img/card-home-file-share.svg
 excerpt: "Most homes now have several devices and no easy way to move files between them. Here's how to turn the Windows PC you already own into a shared folder for your Mac, Windows laptops and phones, with no NAS and no extra cost, and why this is practical now when it wasn't before."
 ---

@@ -10,9 +10,34 @@ permalink: /posts/
   {% if site.posts.size == 0 %}
     <p class="post-empty">No posts yet — check back soon.</p>
   {% else %}
+    {% assign all_tags = "" | split: "," %}
+    {% for tag in site.tags %}
+      {% assign all_tags = all_tags | push: tag[0] %}
+    {% endfor %}
+    {% assign all_tags = all_tags | sort %}
+
+    <div class="post-filter-bar">
+      <div class="post-search-bar">
+        <input type="text" id="post-search-input" placeholder="Search posts by title, excerpt or tag…" aria-label="Search posts">
+      </div>
+      <div class="tag-filter-bar" id="tag-filter-bar">
+        <button type="button" class="tag-filter-btn active" data-tag="all">All</button>
+        {% for tag in all_tags %}
+          <button type="button" class="tag-filter-btn" data-tag="{{ tag | downcase }}">#{{ tag }}</button>
+        {% endfor %}
+      </div>
+    </div>
+
     <ul class="post-index">
       {% for post in site.posts %}
-        <li class="post-index-item">
+        {% assign tag_str = post.tags | join: ' ' | downcase %}
+        {% assign search_blob = post.title %}
+        {% if post.excerpt %}{% assign search_blob = search_blob | append: ' ' | append: post.excerpt %}{% endif %}
+        {% assign search_blob = search_blob | strip_html | append: ' ' | append: tag_str | downcase | normalize_whitespace | escape %}
+        {% assign read_words = post.content | number_of_words %}
+        {% assign read_time = read_words | divided_by: 200.0 | ceil %}
+        {% if read_time < 1 %}{% assign read_time = 1 %}{% endif %}
+        <li class="post-index-item" data-tags="{{ tag_str }}" data-search="{{ search_blob }}">
           <a href="{{ post.url | relative_url }}">
             {% if post.image %}
               <div class="post-thumb">
@@ -20,7 +45,10 @@ permalink: /posts/
               </div>
             {% endif %}
             <div class="post-card-body">
-              <time datetime="{{ post.date | date_to_xmlschema }}">{{ post.date | date: "%b %-d, %Y" }}</time>
+              <div class="post-card-meta">
+                <time datetime="{{ post.date | date_to_xmlschema }}">{{ post.date | date: "%b %-d, %Y" }}</time>
+                <span class="post-read-time">{{ read_time }} min read</span>
+              </div>
               <h2>{{ post.title }}</h2>
               {% if post.excerpt %}<p>{{ post.excerpt | strip_html | truncatewords: 30 }}</p>{% endif %}
               {% if post.tags.size > 0 %}
@@ -33,5 +61,6 @@ permalink: /posts/
         </li>
       {% endfor %}
     </ul>
+    <p class="post-empty" id="post-filter-empty" style="display:none;">No posts match your search.</p>
   {% endif %}
 </section>
