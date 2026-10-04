@@ -1,0 +1,88 @@
+---
+layout: default
+title: HDR Glow Tool
+permalink: /hdr-tool/
+---
+<link rel="stylesheet" href="{{ '/hdr-tool/style.css' | relative_url }}">
+
+<section class="hdr-tool container">
+  <h1 class="section-title"><span class="accent">//</span> HDR Glow</h1>
+  <p class="hdr-tool-intro">
+    Turn an edited photo into an Ultra HDR gain-map JPEG that glows on HDR screens
+    &mdash; Chrome on an HDR Mac, HDR phones, Instagram &mdash; and looks exactly like the
+    original photo everywhere else.
+  </p>
+  <p class="hdr-privacy-note">🔒 Your photos never leave this browser tab. No uploads, no analytics on your images.</p>
+
+  <div class="hdr-dropzones">
+    <div class="hdr-dropzone" id="sdr-dropzone" tabindex="0" role="button" aria-label="Choose edited photo">
+      <input type="file" id="sdr-input" accept="image/jpeg,image/png" hidden>
+      <div class="hdr-dropzone-preview" id="sdr-preview"></div>
+      <div class="hdr-dropzone-label">
+        <strong>Edited photo</strong> <span class="hdr-required">required</span>
+        <span class="hdr-dropzone-hint">JPEG or PNG, sRGB &mdash; drop here or click to choose</span>
+      </div>
+    </div>
+    <div class="hdr-dropzone" id="exr-dropzone" tabindex="0" role="button" aria-label="Choose optional HDR export">
+      <input type="file" id="exr-input" accept=".exr" hidden>
+      <div class="hdr-dropzone-preview" id="exr-preview"></div>
+      <div class="hdr-dropzone-label">
+        <strong>HDR export</strong> <span class="hdr-optional">optional</span>
+        <span class="hdr-dropzone-hint">32-bit OpenEXR of the same edit, ZIP compression</span>
+      </div>
+    </div>
+  </div>
+  <p class="hdr-note" id="exr-status-note" hidden></p>
+
+  <div class="hdr-controls">
+    <label class="hdr-slider">
+      <span class="hdr-slider-label">Sky / highlight glow <output id="sky-value">2.6&times;</output></span>
+      <input type="range" id="sky-slider" min="1" max="4" step="0.1" value="2.6">
+    </label>
+    <label class="hdr-slider">
+      <span class="hdr-slider-label">Light sources glow <output id="light-value">6.0&times;</output></span>
+      <input type="range" id="light-slider" min="1" max="8" step="0.1" value="6.0">
+    </label>
+  </div>
+
+  <div class="hdr-progress" id="hdr-progress" hidden>
+    <div class="hdr-progress-track"><div class="hdr-progress-fill" id="hdr-progress-fill"></div></div>
+    <span id="hdr-progress-label">Processing&hellip;</span>
+  </div>
+
+  <div class="hdr-preview-row">
+    <div class="hdr-preview-card">
+      <h3>Preview</h3>
+      <div class="hdr-preview-frame">
+        <img id="result-preview" alt="HDR result preview">
+        <p class="hdr-preview-empty" id="result-empty">Choose a photo to see a preview.</p>
+      </div>
+      <p class="hdr-preview-hint">Only an HDR screen (in Chrome, or the Instagram app) shows the glow &mdash; a normal screen just shows the photo.</p>
+    </div>
+    <div class="hdr-preview-card">
+      <h3>Glow map</h3>
+      <div class="hdr-preview-frame">
+        <img id="glowmap-preview" alt="Glow map preview">
+        <p class="hdr-preview-empty" id="glowmap-empty">&nbsp;</p>
+      </div>
+      <p class="hdr-preview-hint">Black = unchanged, bright = boosted.</p>
+    </div>
+  </div>
+
+  <div class="hdr-actions">
+    <button class="btn btn-primary" id="download-instagram" disabled>Download for Instagram</button>
+    <button class="btn btn-outline" id="download-full" disabled>Download full size</button>
+  </div>
+
+  <details class="hdr-help">
+    <summary>How to post this, and compatibility notes</summary>
+    <ul>
+      <li>AirDrop or Files-app the downloaded file to your phone, then upload it from the Instagram app. Don&rsquo;t send it through WhatsApp first &mdash; it recompresses images and strips the glow.</li>
+      <li>Only HDR screens show the glow: Chrome on an HDR Mac, and HDR phones (iPhone, recent Android). Non-HDR screens just show the normal photo &mdash; that&rsquo;s by design.</li>
+      <li>On a Mac, the Preview app needs macOS 15+ to show the glow. Chrome always works, on any macOS version.</li>
+      <li>The optional EXR is only used if it actually contains highlight data brighter than your photo and matches its pixel size &mdash; otherwise the glow is synthesized from the photo itself.</li>
+    </ul>
+  </details>
+</section>
+
+<script type="module" src="{{ '/hdr-tool/app.js' | relative_url }}"></script>
