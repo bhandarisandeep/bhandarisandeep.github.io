@@ -2,7 +2,7 @@
 layout: post
 title: "HDR Glow: A Browser Tool That Makes Your Instagram Photos Glow on HDR Screens"
 date: 2026-10-05 10:00:00 +0530
-tags: [hdr, photography, javascript, hobby-project, how-to]
+tags: [hdr, photography, javascript, hobby-project, how-to, affinity]
 excerpt: "A static, client-side tool that turns an edited photo into an Ultra HDR gain-map JPEG — the kind that glows on an HDR Mac in Chrome or in the Instagram app, and looks like a normal photo everywhere else. No server, no upload, no build step."
 ---
 
@@ -35,6 +35,23 @@ The tool:
 4. Writes the two-image container by hand, byte for byte, matching the format Google's
    `libultrahdr` produces, so it's read correctly by Chrome, Instagram, and HDR phones.
 
+## The Same Idea as Lightroom's HDR Editing
+
+If you've used Lightroom Classic or Camera Raw recently, you've probably seen the HDR
+toggle in the histogram panel — it lets you push exposure and highlights above normal
+white when your display can show it, and recent versions can export straight to an HDR
+JPEG or AVIF with that same gain-map technique baked in. That's the same underlying file
+format this tool writes.
+
+The difference is what each one starts from. Lightroom's HDR editing works from the
+original raw file, on a display that can show you the extra headroom while you're
+grading it. This tool works backward from a normal 8-bit JPEG you've already exported —
+no raw file needed, no HDR display needed to use it, no subscription. It can't recover
+detail that was already clipped to white in the export, so instead it estimates: find
+the sky, find the small near-white light sources, and lift those by an amount you
+control with two sliders. It's a reconstruction, not a re-edit — close enough to look
+right, not a substitute for grading in HDR from the raw file if that's an option for you.
+
 ## No Server, Because There Isn't One
 
 This whole site is static — GitHub Pages — so the tool had to be too. There's no upload,
@@ -55,3 +72,16 @@ than trusting that it "looked about right."
 download. To actually see the glow: AirDrop the file to your phone and post it from the
 Instagram app (not WhatsApp — it recompresses images and strips the glow), or open it in
 Chrome on an HDR Mac. On a normal screen, it's just your photo.
+
+## References
+
+- Eric Chan (Adobe), [**Gain Map**](https://forum.affinity.serif.com/applications/core/interface/file/attachment.php?id=335943&key=db9e92dd06542d7ec428309d337820e2)
+  &mdash; version 1.0 draft 12, May 2023. The original Adobe specification proposing
+  the Base + Gain Map concept this whole format is built on &mdash; shared via an
+  Affinity forum thread on exporting HDR from Affinity.
+- [google/libultrahdr](https://github.com/google/libultrahdr) &mdash; the Ultra HDR
+  gain-map JPEG library whose container format and metadata encoding this tool's output
+  matches byte-for-byte.
+- [AcademySoftwareFoundation/openexr](https://github.com/AcademySoftwareFoundation/openexr)
+  &mdash; reference for the EXR file format and its ZIP compression, used for the
+  from-scratch EXR reader.
