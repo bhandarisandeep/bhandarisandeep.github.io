@@ -1,0 +1,161 @@
+<!doctype html>
+<title>large image performance test</title>
+<body>
+<pre id="out">running...</pre>
+<script type="module">
+const results = [];
+function assert(name, cond, detail) {
+  results.push({ name, ok: !!cond, detail: String(detail || '') });
+}
+
+async function makeSyntheticPhoto(w, h) {
+  // A camera-export-ish synthetic photo: sky gradient (bright near top, so the
+  // sky-boost ramp has real work to do), a few near-white "light" blobs
+  // (exercises the lights ramp), and noisy ground texture (exercises blur
+  // cost realistically rather than blurring flat colour).
+  const c = new OffscreenCanvas(w, h);
+  const ctx = c.getContext('2d');
+  const sky = ctx.createLinearGradient(0, 0, 0, h * 0.4);
+  sky.addColorStop(0, '#eaf6ff');
+  sky.addColorStop(1, '#4488cc');
+  ctx.fillStyle = sky;
+  ctx.fillRect(0, 0, w, h * 0.4);
+  ctx.fillStyle = '#334433';
+  ctx.fillRect(0, h * 0.4, w, h * 0.6);
+  // scattered near-white light sources
+  for (let i = 0; i < 40; i++) {
+    ctx.fillStyle = '#fffef0';
+    const x = Math.random() * w;
+    const y = h * 0.3 + Math.random() * h * 0.2;
+    ctx.beginPath();
+    ctx.arc(x, y, 3 + Math.random() * 4, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  // noise texture on the ground so blur has real per-pixel variance to chew on
+  const imgData = ctx.getImageData(0, Math.floor(h * 0.4), w, Math.ceil(h * 0.6));
+  const d = imgData.data;
+  for (let i = 0; i < d.length; i += 4) {
+    const n = (Math.random() - 0.5) * 30;
+    d[i] = Math.max(0, Math.min(255, d[i] + n));
+    d[i + 1] = Math.max(0, Math.min(255, d[i + 1] + n));
+    d[i + 2] = Math.max(0, Math.min(255, d[i + 2] + n));
+  }
+  ctx.putImageData(imgData, 0, Math.floor(h * 0.4));
+  const blob = await c.convertToBlob({ type: 'image/jpeg', quality: 0.92 });
+  return new Uint8Array(await blob.arrayBuffer());
+}
+
+async function run() {
+  const W = 4000,
+    H = 5000;
+  document.title = 'generating synthetic photo...';
+  const t0 = performance.now();
+  const sdrBytes = await makeSyntheticPhoto(W, H);
+  const genTime = performance.now() - t0;
+  assert('synthetic photo generated', sdrBytes.length > 100000, `${sdrBytes.length} bytes in ${genTime.toFixed(0)}ms`);
+  document.title = `generated ${(sdrBytes.length / 1e6).toFixed(1)}MB, processing full size...`;
+
+  // --- Full-size pipeline (no resize) -- the worst case the brief calls out ---
+  const worker = new Worker('../hdr-tool/worker.js', { type: 'module' });
+  const stages = [];
+  const t1 = performance.now();
+  const result = await new Promise((resolve, reject) => {
+    const timeout = setTimeout(() => reject(new Error('TIMEOUT after 60s, last stage: ' + JSON.stringify(stages.at(-1)))), 60000);
+    worker.onmessage = (ev) => {
+      if (ev.data.type === 'progress') {
+        stages.push({ stage: ev.data.stage, t: (performance.now() - t1).toFixed(0) });
+        document.title = `stage: ${ev.data.stage} @ ${stages.at(-1).t}ms`;
+      } else if (ev.data.type === 'result') {
+        clearTimeout(timeout);
+        resolve(ev.data);
+      } else if (ev.data.type === 'error') {
+        clearTimeout(timeout);
+        reject(new Error(ev.data.message));
+      }
+    };
+    worker.onerror = (e) => {
+      clearTimeout(timeout);
+      reject(e.error || new Error(e.message));
+    };
+    worker.postMessage(
+      {
+        type: 'process',
+        id: 1,
+        sdrBytes: sdrBytes.slice().buffer,
+        sdrMime: 'image/jpeg',
+        exrBytes: null,
+        skyBoost: 2.6,
+        lightBoost: 6.0,
+        targetWidth: null, // full size -- the worst case
+        wantGlowMap: true,
+      },
+      [sdrBytes.slice().buffer]
+    );
+  });
+  const elapsed = performance.now() - t1;
+  worker.terminate();
+
+  assert('full-size pipeline completed (did not hang)', true, `${elapsed.toFixed(0)}ms total`);
+  assert('output dimensions match input', result.width === W && result.height === H, `${result.width}x${result.height}`);
+  assert('output produced substantial bytes', result.finalBytes.length > 500000, `${(result.finalBytes.length / 1e6).toFixed(1)}MB`);
+  assert('completed in well under a minute', elapsed < 45000, `${(elapsed / 1000).toFixed(1)}s`);
+  assert(
+    'progress events cover all stages',
+    stages.map((s) => s.stage).join(',') === 'decode,linearize,synthesize,gainmap,encode,assemble,done',
+    stages.map((s) => s.stage).join(',')
+  );
+
+  // Decode the result back to confirm it's genuinely valid at full size
+  let i = 2,
+    primaryEoi = -1;
+  const fb = result.finalBytes;
+  while (i < fb.length - 1) {
+    if (fb[i] !== 0xff) {
+      i++;
+      continue;
+    }
+    if (fb[i + 1] === 0xd9) {
+      primaryEoi = i + 2;
+      break;
+    }
+    if (fb[i + 1] === 0x01 || (fb[i + 1] >= 0xd0 && fb[i + 1] <= 0xd7)) {
+      i += 2;
+      continue;
+    }
+    if (fb[i + 1] === 0xda) {
+      const len = (fb[i + 2] << 8) | fb[i + 3];
+      let j = i + 2 + len;
+      while (j < fb.length - 1) {
+        if (fb[j] === 0xff && fb[j + 1] !== 0x00 && !(fb[j + 1] >= 0xd0 && fb[j + 1] <= 0xd7)) break;
+        j++;
+      }
+      i = j;
+      continue;
+    }
+    const len = (fb[i + 2] << 8) | fb[i + 3];
+    i += 2 + len;
+  }
+  try {
+    const bmp = await createImageBitmap(new Blob([fb.slice(0, primaryEoi)], { type: 'image/jpeg' }));
+    assert('full-size output decodes as valid JPEG', bmp.width === W && bmp.height === H, `${bmp.width}x${bmp.height}`);
+    bmp.close();
+  } catch (e) {
+    assert('full-size output decodes as valid JPEG', false, e.message);
+  }
+
+  report(elapsed, stages);
+}
+
+function report(elapsed, stages) {
+  const failed = results.filter((r) => !r.ok);
+  const lines = results.map((r) => `${r.ok ? 'PASS' : 'FAIL'}  ${r.name}  (${r.detail})`);
+  const summary = `${results.length - failed.length}/${results.length} passed, total ${(elapsed / 1000).toFixed(1)}s`;
+  document.getElementById('out').textContent = lines.join('\n') + '\n\nstage timings: ' + JSON.stringify(stages) + '\n\n' + summary;
+  document.title = (failed.length === 0 ? 'ALL_PASS:' : 'SOME_FAIL:') + summary;
+}
+
+run().catch((e) => {
+  document.getElementById('out').textContent = 'ERROR: ' + (e.stack || e.message);
+  document.title = 'ERROR:' + e.message;
+});
+</script>

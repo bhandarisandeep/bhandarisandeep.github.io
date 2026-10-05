@@ -1,0 +1,143 @@
+<!doctype html>
+<title>cross-browser smoke test</title>
+<body>
+<pre id="out">running...</pre>
+<script type="module">
+const results = { ua: navigator.userAgent, checks: [] };
+function assert(name, cond, detail) {
+  results.checks.push({ name, ok: !!cond, detail: String(detail || '') });
+}
+
+async function report() {
+  const failed = results.checks.filter((c) => !c.ok);
+  results.summary = `${results.checks.length - failed.length}/${results.checks.length} passed`;
+  document.getElementById('out').textContent = JSON.stringify(results, null, 2);
+  document.title = (failed.length === 0 ? 'ALL_PASS:' : 'SOME_FAIL:') + results.summary;
+  try {
+    await fetch('http://127.0.0.1:8899/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(results),
+    });
+  } catch (e) {
+    document.title += ' (report POST failed: ' + e.message + ')';
+  }
+}
+
+async function run() {
+  // --- Feature detection: every API the tool depends on ---
+  assert('OffscreenCanvas', typeof OffscreenCanvas !== 'undefined');
+  assert('Worker', typeof Worker !== 'undefined');
+  assert('DecompressionStream', typeof DecompressionStream !== 'undefined');
+  assert('createImageBitmap', typeof createImageBitmap !== 'undefined');
+  assert('Blob.prototype.stream', typeof Blob.prototype.stream === 'function');
+  assert('ES modules (import.meta)', typeof import.meta !== 'undefined');
+
+  if (typeof OffscreenCanvas !== 'undefined') {
+    const c = new OffscreenCanvas(4, 4);
+    assert('OffscreenCanvas.getContext(2d)', !!c.getContext('2d'));
+    assert('OffscreenCanvas.convertToBlob', typeof c.convertToBlob === 'function');
+  }
+
+  if (typeof createImageBitmap !== 'undefined') {
+    try {
+      const c = new OffscreenCanvas(10, 10);
+      const ctx = c.getContext('2d');
+      ctx.fillStyle = '#448';
+      ctx.fillRect(0, 0, 10, 10);
+      const blob = await c.convertToBlob({ type: 'image/jpeg' });
+      const bmp = await createImageBitmap(blob, { resizeWidth: 5, resizeHeight: 5, resizeQuality: 'high' });
+      assert('createImageBitmap with resize options', bmp.width === 5 && bmp.height === 5, `${bmp.width}x${bmp.height}`);
+      bmp.close();
+    } catch (e) {
+      assert('createImageBitmap with resize options', false, e.message);
+    }
+  }
+
+  // --- Run the REAL pipeline against the REAL test photo, exactly like production use ---
+  try {
+    const sdrBuf = await fetch('./test_input_1080.jpg').then((r) => r.arrayBuffer());
+    const worker = new Worker('../hdr-tool/worker.js', { type: 'module' });
+    const t0 = performance.now();
+    const result = await new Promise((resolve, reject) => {
+      const timeout = setTimeout(() => reject(new Error('pipeline timeout after 30s')), 30000);
+      worker.onmessage = (ev) => {
+        if (ev.data.type === 'result') {
+          clearTimeout(timeout);
+          resolve(ev.data);
+        } else if (ev.data.type === 'error') {
+          clearTimeout(timeout);
+          reject(new Error(ev.data.message));
+        }
+      };
+      worker.onerror = (e) => {
+        clearTimeout(timeout);
+        reject(e.error || new Error(e.message));
+      };
+      worker.postMessage(
+        {
+          type: 'process',
+          id: 1,
+          sdrBytes: sdrBuf,
+          sdrMime: 'image/jpeg',
+          exrBytes: null,
+          skyBoost: 2.6,
+          lightBoost: 6.0,
+          targetWidth: 1080,
+          wantGlowMap: true,
+        },
+        [sdrBuf]
+      );
+    });
+    const elapsed = performance.now() - t0;
+    worker.terminate();
+    assert('real pipeline: produced output', result.finalBytes && result.finalBytes.length > 10000, `${result.finalBytes?.length} bytes`);
+    assert('real pipeline: correct width', result.width === 1080, `${result.width}`);
+    assert('real pipeline: completed without hanging', elapsed < 25000, `${elapsed.toFixed(0)}ms`);
+
+    // Decode the primary portion back to confirm it's a genuinely valid, viewable JPEG
+    let i = 2,
+      primaryEoi = -1;
+    const fb = result.finalBytes;
+    while (i < fb.length - 1) {
+      if (fb[i] !== 0xff) {
+        i++;
+        continue;
+      }
+      if (fb[i + 1] === 0xd9) {
+        primaryEoi = i + 2;
+        break;
+      }
+      if (fb[i + 1] === 0x01 || (fb[i + 1] >= 0xd0 && fb[i + 1] <= 0xd7)) {
+        i += 2;
+        continue;
+      }
+      if (fb[i + 1] === 0xda) {
+        const len = (fb[i + 2] << 8) | fb[i + 3];
+        let j = i + 2 + len;
+        while (j < fb.length - 1) {
+          if (fb[j] === 0xff && fb[j + 1] !== 0x00 && !(fb[j + 1] >= 0xd0 && fb[j + 1] <= 0xd7)) break;
+          j++;
+        }
+        i = j;
+        continue;
+      }
+      const len = (fb[i + 2] << 8) | fb[i + 3];
+      i += 2 + len;
+    }
+    const primaryBlob = new Blob([fb.slice(0, primaryEoi)], { type: 'image/jpeg' });
+    const bmp = await createImageBitmap(primaryBlob);
+    assert('real pipeline: output decodes as valid JPEG', bmp.width === 1080, `${bmp.width}x${bmp.height}`);
+    bmp.close();
+  } catch (e) {
+    assert('real pipeline: ran without error', false, e.stack || e.message);
+  }
+
+  await report();
+}
+
+run().catch(async (e) => {
+  assert('run() completed without throwing', false, e.stack || e.message);
+  await report();
+});
+</script>
