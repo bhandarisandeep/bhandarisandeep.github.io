@@ -229,17 +229,26 @@
 .post-body p { margin-bottom: 1.3rem; color: var(--text-secondary); }
 .post-body strong { color: var(--text-primary); }
 
-/* ---- HDR-aware highlight (experimental) -----------------------------------
-   On an HDR-capable display, in a browser that supports the CSS HDR color
-   spec, this renders brighter than standard white -- the same above-SDR-
-   white headroom the HDR Glow tool adds to photos, applied to text instead.
-   Everywhere else it's just a bold, coloured phrase: the @media query and
-   the color() function both fail closed (unsupported media features don't
-   match; unsupported color() values are simply dropped, leaving the normal
-   `color` below in place), so there's no broken state on older browsers. */
+/* ---- HDR-aware highlight -----------------------------------------------
+   Two layers. The base layer is pure aesthetic -- a soft glow-shadow, the
+   same reliable technique as .glow-text, so it looks good on literally
+   every screen. The @media layer on top is the real experiment: on an
+   HDR-capable display, in a browser that supports the CSS HDR color spec,
+   it renders brighter than standard white -- the same above-SDR-white
+   headroom the HDR Glow tool adds to photos, applied to text instead.
+   Both enhancement layers fail closed (unsupported media features don't
+   match; unsupported color() values are simply dropped, leaving the layer
+   below in place), so there's no broken state on older browsers. */
 .post-body .hdr-highlight {
   color: var(--accent-green);
   font-weight: 600;
+  text-shadow: 0 0 14px rgba(0, 255, 136, 0.45);
+}
+
+@supports (color: color-mix(in srgb, red, red)) {
+  .post-body .hdr-highlight {
+    text-shadow: 0 0 14px color-mix(in srgb, var(--accent-green) 60%, transparent);
+  }
 }
 
 @media (dynamic-range: high) {

@@ -22,6 +22,21 @@
 
 html { scroll-behavior: smooth; }
 
+/* ---- Glow text utility: a soft accent-coloured text-shadow, the same
+   "neon" treatment other HDR-photo tools use for their own branding.
+   Pure CSS aesthetic, not an attempt at real above-white brightness (see
+   blog.css's .hdr-highlight for that experiment) -- renders identically
+   on every screen, enhanced where color-mix() is supported. ---- */
+.glow-text {
+  text-shadow: 0 0 20px rgba(0, 240, 255, 0.55);
+}
+
+@supports (color: color-mix(in srgb, red, red)) {
+  .glow-text {
+    text-shadow: 0 0 20px color-mix(in srgb, var(--accent) 65%, transparent);
+  }
+}
+
 body {
   font-family: var(--font-sans);
   background: var(--bg-primary);

@@ -13,7 +13,7 @@ glow, highlights that have real headroom above white. Instagram and modern phone
 that glow — it's called an **Ultra HDR gain-map JPEG** — but nothing in my normal export
 workflow produces one.
 
-So I built [**HDR Glow**](/hdr-tool/): a small, static page that takes a normal edited
+So I built [<span class="glow-text">**HDR Glow**</span>](/hdr-tool/): a small, static page that takes a normal edited
 photo and writes a gain-map JPEG next to it. Same pixels on a normal screen. A visible glow
 on an HDR one.
 
@@ -83,7 +83,7 @@ brighter sky, brighter highlights on the road markings and the distant headlight
   </figure>
   <figure>
     <img src="/assets/img/hdr-demo-after.jpg" alt="The same photo as an Ultra HDR gain-map JPEG">
-    <figcaption><strong>After</strong> &mdash; run through the tool, default sliders (2.6&times; / 6.0&times;)</figcaption>
+    <figcaption><strong class="glow-text">After</strong> &mdash; run through the tool, default sliders (2.6&times; / 6.0&times;)</figcaption>
   </figure>
 </div>
 
