@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 260" font-family="'JetBrains Mono', monospace" role="img" aria-label="SDR base photo plus gain map equals HDR rendition">
+  <defs>
+    <linearGradient id="cg2" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#00f0ff"/>
+      <stop offset="1" stop-color="#00ff88"/>
+    </linearGradient>
+  </defs>
+  <rect width="900" height="260" fill="#0a0e17"/>
+  <text x="30" y="42" fill="url(#cg2)" font-size="20" font-weight="700">// Base + Gain Map = HDR Rendition</text>
+
+  <!-- Base (SDR) -->
+  <g>
+    <rect x="40" y="90" width="190" height="110" rx="12" fill="#141c2e" stroke="#00f0ff" stroke-opacity="0.4"/>
+    <text x="135" y="118" fill="#00f0ff" font-size="15" font-weight="700" text-anchor="middle">Base</text>
+    <text x="135" y="140" fill="#8892a8" font-size="11" text-anchor="middle">Your normal JPEG</text>
+    <text x="135" y="156" fill="#8892a8" font-size="11" text-anchor="middle">what every screen sees</text>
+    <rect x="75" y="168" width="120" height="20" rx="3" fill="#13304a"/>
+    <circle cx="170" cy="177" r="7" fill="#fffef0"/>
+  </g>
+  <text x="250" y="152" fill="#e2e8f0" font-size="30" text-anchor="middle">+</text>
+
+  <!-- Gain Map -->
+  <g>
+    <rect x="280" y="90" width="190" height="110" rx="12" fill="#141c2e" stroke="#00f0ff" stroke-opacity="0.4"/>
+    <text x="375" y="118" fill="#00f0ff" font-size="15" font-weight="700" text-anchor="middle">Gain Map</text>
+    <text x="375" y="140" fill="#8892a8" font-size="11" text-anchor="middle">Half-res greyscale:</text>
+    <text x="375" y="156" fill="#8892a8" font-size="11" text-anchor="middle">how much brighter, per pixel</text>
+    <rect x="315" y="168" width="120" height="20" rx="3" fill="#06090f"/>
+    <rect x="315" y="168" width="60" height="20" fill="#2a2f3a"/>
+    <circle cx="410" cy="177" r="7" fill="#fff"/>
+  </g>
+  <text x="490" y="152" fill="#e2e8f0" font-size="30" text-anchor="middle">=</text>
+
+  <!-- Result -->
+  <g>
+    <rect x="520" y="90" width="340" height="110" rx="12" fill="rgba(0,240,255,0.06)" stroke="url(#cg2)" stroke-width="2"/>
+    <text x="690" y="118" fill="url(#cg2)" font-size="15" font-weight="700" text-anchor="middle">Ultra HDR JPEG</text>
+    <text x="690" y="140" fill="#8892a8" font-size="11" text-anchor="middle">SDR screens: same photo, unchanged</text>
+    <text x="690" y="156" fill="#00ff88" font-size="11" text-anchor="middle">HDR screens: sky and lights glow</text>
+    <rect x="565" y="168" width="250" height="20" rx="3" fill="#13304a"/>
+    <circle cx="660" cy="177" r="9" fill="#fffef0"/>
+    <circle cx="660" cy="177" r="15" fill="#fffef0" opacity="0.3"/>
+  </g>
+</svg>

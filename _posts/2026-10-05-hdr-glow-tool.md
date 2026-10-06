@@ -3,6 +3,7 @@ layout: post
 title: "HDR Glow: A Browser Tool That Makes Your Instagram Photos Glow on HDR Screens"
 date: 2026-10-05 10:00:00 +0530
 tags: [hdr, photography, javascript, hobby-project, how-to, affinity]
+image: /assets/img/card-hdr-glow.svg
 excerpt: "A static, client-side tool that turns an edited photo into an Ultra HDR gain-map JPEG — the kind that glows on an HDR Mac in Chrome or in the Instagram app, and looks like a normal photo everywhere else. No server, no upload, no build step."
 ---
 
@@ -17,6 +18,8 @@ photo and writes a gain-map JPEG next to it. Same pixels on a normal screen. A v
 on an HDR one.
 
 ## What It Actually Does
+
+![A base photo plus a gain map equals an Ultra HDR rendition](/assets/img/hdr-concept.svg)
 
 A gain-map JPEG is two images stapled into one file: the normal photo you already have, and
 a small greyscale "gain map" that says, per pixel, how much brighter this should look on a
@@ -65,6 +68,31 @@ profile, and a CIPA Multi-Picture Format block whose byte offsets have to point 
 the right place or nothing reads it. Getting that right meant parsing a known-good
 reference file byte by byte and checking my output against it, segment by segment, rather
 than trusting that it "looked about right."
+
+## See It For Yourself
+
+Same file, two screens. On a normal display both sides look identical &mdash; that's the
+point, the format is backward compatible. <span class="hdr-highlight">If you're reading
+this in Chrome on an HDR-capable display, the right-hand image should actually glow</span>:
+brighter sky, brighter highlights on the road markings and the distant headlights.
+
+<div class="hdr-compare">
+  <figure>
+    <img src="/assets/img/hdr-demo-before.jpg" alt="The original edited photo, no HDR">
+    <figcaption><strong>Before</strong> &mdash; the plain exported JPEG</figcaption>
+  </figure>
+  <figure>
+    <img src="/assets/img/hdr-demo-after.jpg" alt="The same photo as an Ultra HDR gain-map JPEG">
+    <figcaption><strong>After</strong> &mdash; run through the tool, default sliders (2.6&times; / 6.0&times;)</figcaption>
+  </figure>
+</div>
+
+That highlighted sentence a moment ago is a small experiment: on a browser and display that
+support the CSS HDR color spec, it renders with real above-white brightness &mdash; the same
+headroom concept as the image, applied to text. Everywhere else it's just bold green text,
+no different from any other emphasis on this page. The spec is still a working draft, so
+this is a "try it and see" addition more than a guaranteed one &mdash; if it looks broken on
+your setup rather than just inert, that's worth knowing.
 
 ## Try It
 

@@ -229,6 +229,59 @@
 .post-body p { margin-bottom: 1.3rem; color: var(--text-secondary); }
 .post-body strong { color: var(--text-primary); }
 
+/* ---- HDR-aware highlight (experimental) -----------------------------------
+   On an HDR-capable display, in a browser that supports the CSS HDR color
+   spec, this renders brighter than standard white -- the same above-SDR-
+   white headroom the HDR Glow tool adds to photos, applied to text instead.
+   Everywhere else it's just a bold, coloured phrase: the @media query and
+   the color() function both fail closed (unsupported media features don't
+   match; unsupported color() values are simply dropped, leaving the normal
+   `color` below in place), so there's no broken state on older browsers. */
+.post-body .hdr-highlight {
+  color: var(--accent-green);
+  font-weight: 600;
+}
+
+@media (dynamic-range: high) {
+  .post-body .hdr-highlight {
+    color: color(rec2100-pq 0.7 0.95 0.8);
+    text-shadow: 0 0 14px color(rec2100-pq 0.55 0.85 0.7);
+  }
+}
+
+/* ---- Before/after image comparison ---- */
+.hdr-compare {
+  display: flex;
+  gap: 1.2rem;
+  margin: 1.5rem 0;
+  flex-wrap: wrap;
+}
+
+.hdr-compare figure {
+  flex: 1 1 260px;
+  margin: 0;
+  background: var(--bg-card);
+  border: 1px solid rgba(0, 240, 255, 0.1);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.hdr-compare img {
+  width: 100%;
+  display: block;
+}
+
+.hdr-compare figcaption {
+  padding: 0.7rem 1rem;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+}
+
+.hdr-compare figcaption strong {
+  color: var(--accent);
+}
+
 .post-body a {
   color: var(--accent);
   text-decoration: underline;
